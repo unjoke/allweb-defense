@@ -23,7 +23,7 @@ _XSS_TAGS = re.compile(
 
 _PATH_TRAVERSAL = re.compile(r"\.\.[/\\]|\.\.%2[fF]|\.\.%5[cC]")
 
-_CMD_CHARS = re.compile(r"[;&|`$]|\$\(|>>?|<")
+_CMD_CHARS = re.compile(r"[;&|`$]|\$\(")
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"}
 
@@ -54,7 +54,7 @@ def is_allowed_extension(filename: str) -> bool:
     return ext.lower() in ALLOWED_EXTENSIONS
 
 
-def check_rate_limit(ip: str, state: dict, config: dict) -> bool:
+def check_rate_limit(ip: str, state: dict) -> bool:
     now = time.time()
     entry = state.get(ip)
     if entry is None:

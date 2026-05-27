@@ -107,7 +107,7 @@ def test_extension_no_ext_blocked():
 def test_rate_limit_not_locked_initially():
     state = {}
     config = {"max_failures": 3, "window": 60, "lockout": 300}
-    assert d.check_rate_limit("1.2.3.4", state, config) is False
+    assert d.check_rate_limit("1.2.3.4", state) is False
 
 def test_rate_limit_locked_after_threshold():
     state = {}
@@ -115,7 +115,7 @@ def test_rate_limit_locked_after_threshold():
     ip = "1.2.3.4"
     for _ in range(4):  # one more than max_failures
         d.record_login_failure(ip, state, config)
-    assert d.check_rate_limit(ip, state, config) is True
+    assert d.check_rate_limit(ip, state) is True
 
 def test_rate_limit_not_locked_below_threshold():
     state = {}
@@ -123,12 +123,19 @@ def test_rate_limit_not_locked_below_threshold():
     ip = "1.2.3.4"
     for _ in range(3):  # exactly max_failures, not exceeded
         d.record_login_failure(ip, state, config)
-    assert d.check_rate_limit(ip, state, config) is False
+    assert d.check_rate_limit(ip, state) is False
 
 def test_rate_limit_independent_ips():
     state = {}
     config = {"max_failures": 3, "window": 60, "lockout": 300}
     for _ in range(4):
         d.record_login_failure("1.1.1.1", state, config)
-    assert d.check_rate_limit("1.1.1.1", state, config) is True
-    assert d.check_rate_limit("2.2.2.2", state, config) is False
+    assert d.check_rate_limit("1.1.1.1", state) is True
+    assert d.check_rate_limit("2.2.2.2", state) is False
+
+
+# --- XSS anchor javascript: vector ---
+
+def test_xss_anchor_javascript_sanitized():
+    result = d.sanitize_xss('<a href="javascript:alert(1)">click</a>')
+    assert "javascript:alert" not in result
