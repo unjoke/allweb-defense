@@ -3,7 +3,7 @@
 ---
 change: two-web-vuln-defense
 design-doc: docs/superpowers/specs/2026-05-27-two-web-vuln-defense-design.md
-base-ref: no-git
+base-ref: 423b0f7f1d7a3f9e326648219968d12a52a8c098
 ---
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
