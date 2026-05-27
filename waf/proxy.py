@@ -21,7 +21,7 @@ from waf.detector import (
 _rate_state: dict = {}
 
 SECURITY_HEADERS = {
-    "Content-Security-Policy": "default-src 'self'",
+    "Content-Security-Policy": "default-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net",
     "X-Frame-Options": "DENY",
     "X-Content-Type-Options": "nosniff",
     "X-XSS-Protection": "1; mode=block",
