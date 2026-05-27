@@ -90,7 +90,7 @@ def _rebuild_multipart(parts_data) -> aiohttp.FormData:
 
 # --- main handler ---
 
-async def handle_request(request: web.Request, config: dict, logger: logging.Logger) -> web.Response:
+async def handle_request(request: web.Request, config: dict, logger: logging.Logger, session: aiohttp.ClientSession) -> web.Response:
     ip = request.remote or "unknown"
     path = request.path
     rules = config.get("rules", {})
@@ -177,7 +177,10 @@ async def handle_request(request: web.Request, config: dict, logger: logging.Log
         forward_url += "?" + query_string
 
     # 7. Filter headers — remove hop-by-hop and host, add X-Forwarded-For
+    is_multipart = "multipart/form-data" in content_type
     skip_headers = {"host", "transfer-encoding", "content-length"}
+    if is_multipart:
+        skip_headers.add("content-type")
     forward_headers = {
         k: v for k, v in request.headers.items()
         if k.lower() not in skip_headers
@@ -185,27 +188,26 @@ async def handle_request(request: web.Request, config: dict, logger: logging.Log
     forward_headers["X-Forwarded-For"] = ip
 
     # 8. Forward request to backend
-    async with aiohttp.ClientSession() as session:
-        async with session.request(
-            method=request.method,
-            url=forward_url,
-            headers=forward_headers,
-            data=forward_body,
-            allow_redirects=False,
-        ) as backend_resp:
-            body = await backend_resp.read()
-            resp_headers = dict(backend_resp.headers)
-            # Remove hop-by-hop headers that aiohttp already handles
-            for h in ("Transfer-Encoding", "Content-Encoding", "Content-Length"):
-                resp_headers.pop(h, None)
-            # Inject security headers
-            if rules.get("security_headers", True):
-                resp_headers.update(SECURITY_HEADERS)
-            return web.Response(
-                status=backend_resp.status,
-                headers=resp_headers,
-                body=body,
-            )
+    async with session.request(
+        method=request.method,
+        url=forward_url,
+        headers=forward_headers,
+        data=forward_body,
+        allow_redirects=False,
+    ) as backend_resp:
+        body = await backend_resp.read()
+        resp_headers = dict(backend_resp.headers)
+        # Remove hop-by-hop headers that aiohttp already handles
+        for h in ("Transfer-Encoding", "Content-Encoding", "Content-Length"):
+            resp_headers.pop(h, None)
+        # Inject security headers
+        if rules.get("security_headers", True):
+            resp_headers.update(SECURITY_HEADERS)
+        return web.Response(
+            status=backend_resp.status,
+            headers=resp_headers,
+            body=body,
+        )
 
 
 # --- entry point ---
@@ -214,14 +216,22 @@ def main():
     config = load_config()
     logger = _setup_logger(config["log_path"])
 
+    async def _on_startup(app):
+        app["session"] = aiohttp.ClientSession()
+
+    async def _on_cleanup(app):
+        await app["session"].close()
+
     async def _handler(request):
         try:
-            return await handle_request(request, config, logger)
+            return await handle_request(request, config, logger, request.app["session"])
         except Exception as e:
             logger.error(f"Proxy error: {e}")
             return web.Response(status=502, text="Bad Gateway")
 
     app = web.Application()
+    app.on_startup.append(_on_startup)
+    app.on_cleanup.append(_on_cleanup)
     app.router.add_route("*", "/{path_info:.*}", _handler)
 
     port = config["listen_port"]
