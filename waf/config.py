@@ -2,6 +2,8 @@ import argparse
 import copy
 import sys
 
+_UNSET = object()
+
 try:
     import yaml
 except ImportError:
@@ -40,23 +42,11 @@ def _deep_merge(base: dict, override: dict) -> dict:
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="WAF reverse proxy")
-    parser.add_argument("--listen", type=int, metavar="PORT", help="override listen_port")
-    parser.add_argument("--backend", type=str, metavar="URL", help="override backend_url")
-    parser.add_argument(
-        "--config",
-        type=str,
-        metavar="PATH",
-        default="waf/config.yaml",
-        help="path to YAML config file (default: waf/config.yaml)",
-    )
-    parser.add_argument(
-        "--disable",
-        nargs="+",
-        metavar="RULE",
-        default=[],
-        help="disable one or more rules by name",
-    )
+    parser = argparse.ArgumentParser(description="WAF Reverse Proxy")
+    parser.add_argument("--listen", type=int, default=None)
+    parser.add_argument("--backend", type=str, default=None)
+    parser.add_argument("--config", type=str, default=_UNSET)
+    parser.add_argument("--disable", nargs="+", default=[])
     return parser
 
 
@@ -67,10 +57,8 @@ def load_config(argv=None) -> dict:
     config = copy.deepcopy(DEFAULTS)
 
     # Determine whether --config was explicitly provided or is the default
-    default_config_path = "waf/config.yaml"
-    config_explicitly_set = argv is not None and "--config" in argv
-
-    config_path = args.config
+    config_explicitly_set = args.config is not _UNSET
+    config_path = args.config if config_explicitly_set else "waf/config.yaml"
 
     if yaml is not None:
         try:
@@ -96,7 +84,10 @@ def load_config(argv=None) -> dict:
         config["backend_url"] = args.backend
 
     # Apply --disable rules
-    for rule_name in args.disable:
+    for rule_name in (args.disable or []):
+        if rule_name not in config["rules"]:
+            print(f"Warning: unknown rule '{rule_name}', ignoring", file=sys.stderr)
+            continue
         config["rules"][rule_name] = False
 
     return config
