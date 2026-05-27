@@ -2,6 +2,8 @@
 comet_change: two-web-vuln-defense
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-05-27-two-web-vuln-defense
+status: final
 ---
 
 ## 架构与数据流

@@ -11,6 +11,6 @@ verification_report: docs/superpowers/reports/2026-05-27-two-web-vuln-defense-ve
 branch_status: handled
 created_at: 2026-05-27
 verified_at: 2026-05-27
-archived: false
+archived: true
 handoff_context: openspec/changes/two-web-vuln-defense/.comet/handoff/design-context.json
 handoff_hash: b8d881fac6f5f22db0050ee40c8ce294ef0506873ffacb4d30041bb41c72e5e7

@@ -164,3 +164,7 @@
 2026-05-27 13:28:15 | BLOCKED | type=vertical-privilege-escalation | ip=127.0.0.1 | path=/admin/messages | payload=/admin/messages
 2026-05-27 13:28:15 | BLOCKED | type=csrf | ip=127.0.0.1 | path=/admin/messages/delete | payload=
 2026-05-27 13:28:15 | BLOCKED | type=brute-force | ip=127.0.0.1 | path=/login | payload=ip=127.0.0.1
+2026-05-27 16:31:42 | BLOCKED | type=sql-injection | ip=127.0.0.1 | path=/search | payload=' UNION SELECT * FROM users--
+2026-05-27 16:31:42 | BLOCKED | type=path-traversal | ip=127.0.0.1 | path=/view | payload=../../etc/passwd
+2026-05-27 16:31:42 | BLOCKED | type=cmd-injection | ip=127.0.0.1 | path=/view | payload=msg_1.txt;id
+2026-05-27 16:31:42 | SANITIZED | type=xss | ip=127.0.0.1 | path=/search | payload=<script>alert(1)</script>

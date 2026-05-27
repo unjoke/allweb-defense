@@ -1,3 +1,7 @@
+---
+archived-with: 2026-05-27-two-web-vuln-defense
+status: final
+---
 # WAF Reverse Proxy Implementation Plan
 
 ---
