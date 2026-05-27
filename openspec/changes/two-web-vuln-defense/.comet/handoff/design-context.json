@@ -1,0 +1,16 @@
+{
+  "change": "two-web-vuln-defense",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "b8d881fac6f5f22db0050ee40c8ce294ef0506873ffacb4d30041bb41c72e5e7",
+  "files": [
+    { "path": "openspec/changes/two-web-vuln-defense/proposal.md", "sha256": "8a62450a3c00bd4909ba56f44218fc2267bb098910625cb57d71963f38a1c1d7" },
+    { "path": "openspec/changes/two-web-vuln-defense/design.md", "sha256": "7f5d86af8d1de3bbdf7c7db1249b61b728fefdfe9804cfa53f61879eccf6a581" },
+    { "path": "openspec/changes/two-web-vuln-defense/tasks.md", "sha256": "60e7c4ed1b0102e941c3481da4bed4f6bfea8d3e7db1bd9f2038ce7da1630054" },
+    { "path": "openspec/changes/two-web-vuln-defense/specs/waf-config/spec.md", "sha256": "eac1e611ed3c7a655e17e714316621b95a2b9e1f8d3465a183110cc8198ff53c" },
+    { "path": "openspec/changes/two-web-vuln-defense/specs/waf-detector/spec.md", "sha256": "a4e32f660c3f1e3d7cc529e1c78bf4ec56519c4f055b4eb4ea6b415f30090bd7" },
+    { "path": "openspec/changes/two-web-vuln-defense/specs/waf-proxy/spec.md", "sha256": "4efe69d9a45835abc31e14965d63565f943af56d6ceb335e8bfe44dc4d36ba40" }
+  ]
+}

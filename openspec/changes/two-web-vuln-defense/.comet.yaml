@@ -1,0 +1,16 @@
+workflow: full
+phase: build
+build_mode: null
+isolation: null
+verify_mode: null
+base_ref: null
+design_doc: docs/superpowers/specs/2026-05-27-two-web-vuln-defense-design.md
+plan: docs/superpowers/plans/2026-05-27-two-web-vuln-defense.md
+verify_result: pending
+verification_report: null
+branch_status: pending
+created_at: 2026-05-27
+verified_at: null
+archived: false
+handoff_context: openspec/changes/two-web-vuln-defense/.comet/handoff/design-context.json
+handoff_hash: b8d881fac6f5f22db0050ee40c8ce294ef0506873ffacb4d30041bb41c72e5e7

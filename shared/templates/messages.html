@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}留言板{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <h4>留言板</h4>
+    <div class="card mb-4">
+      <div class="card-body">
+        <form method="POST" action="/messages">
+          {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          {% endif %}
+          <div class="mb-2">
+            <textarea name="content" class="form-control" rows="3" placeholder="写下你的留言..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">发布留言</button>
+        </form>
+      </div>
+    </div>
+    {% for msg in messages %}
+    <div class="card mb-2">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <strong>{{ msg.username }}</strong>
+          <small class="text-muted">{{ msg.created_at }}</small>
+        </div>
+        <!-- VULN: content rendered without escaping in vulnerable version -->
+        <p class="mt-2 mb-1">{{ msg.content | safe }}</p>
+        <div class="d-flex gap-2">
+          <a href="/download?filename=msg_{{ msg.id }}_{{ msg.username }}.txt" class="btn btn-sm btn-outline-secondary">下载</a>
+          <form method="POST" action="/messages/delete" style="display:inline">
+            {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% endif %}
+            <input type="hidden" name="msg_id" value="{{ msg.id }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <p class="text-muted">暂无留言</p>
+    {% endfor %}
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">快速搜索</div>
+      <div class="card-body">
+        <form method="GET" action="/search">
+          <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="搜索留言...">
+            <button class="btn btn-outline-primary" type="submit">搜索</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

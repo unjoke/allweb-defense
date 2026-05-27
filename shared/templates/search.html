@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}搜索结果{% endblock %}
+{% block content %}
+<h4>搜索结果</h4>
+<!-- VULN: q reflected without escaping in vulnerable version -->
+<p class="text-muted">关键词：{{ q | safe }}</p>
+{% if results %}
+  {% for msg in results %}
+  <div class="card mb-2">
+    <div class="card-body">
+      <strong>{{ msg.username }}</strong>
+      <span class="text-muted ms-2">{{ msg.created_at }}</span>
+      <p class="mt-1 mb-0">{{ msg.content | safe }}</p>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <p class="text-muted">未找到相关留言</p>
+{% endif %}
+<a href="/messages" class="btn btn-secondary mt-3">返回留言板</a>
+{% endblock %}

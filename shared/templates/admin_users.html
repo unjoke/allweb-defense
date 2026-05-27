@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}用户管理{% endblock %}
+{% block content %}
+<h4>用户管理 <span class="badge bg-warning text-dark">Admin</span></h4>
+<table class="table table-striped">
+  <thead><tr><th>ID</th><th>用户名</th><th>角色</th><th>邮箱</th><th>操作</th></tr></thead>
+  <tbody>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.id }}</td>
+      <td>{{ u.username }}</td>
+      <td><span class="badge bg-{{ 'danger' if u.role == 'admin' else 'secondary' }}">{{ u.role }}</span></td>
+      <td>{{ u.email }}</td>
+      <td>
+        <form method="POST" action="/admin/users/delete" style="display:inline">
+          {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          {% endif %}
+          <input type="hidden" name="user_id" value="{{ u.id }}">
+          <button type="submit" class="btn btn-sm btn-danger"
+            onclick="return confirm('确认删除？')">删除</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
