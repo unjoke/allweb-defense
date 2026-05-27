@@ -101,7 +101,6 @@ async def handle_request(request: web.Request, config: dict, logger: logging.Log
     if rules.get("rate_limit", True) and request.method == "POST" and path == login_path:
         if check_rate_limit(ip, _rate_state):
             _log_block(logger, "brute-force", ip, path, "rate-limit-exceeded")
-            record_login_failure(ip, _rate_state, rate_cfg)
             return _blocked(429, "Too Many Requests")
         record_login_failure(ip, _rate_state, rate_cfg)
 
