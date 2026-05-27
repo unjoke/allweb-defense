@@ -1,0 +1,16 @@
+listen_port: 8080
+backend_url: "http://127.0.0.1:5000"
+login_path: "/login"
+rules:
+  sql_injection: true
+  xss: true
+  path_traversal: true
+  cmd_injection: true
+  rate_limit: true
+  file_upload: true
+  security_headers: true
+rate_limit:
+  max_failures: 10
+  window: 60
+  lockout: 300
+log_path: "security.log"
