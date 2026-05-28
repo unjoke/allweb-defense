@@ -1,9 +1,12 @@
 """HTTP runner that dispatches payloads to the WAF and records results."""
 from __future__ import annotations
+import sys
 import time
 from dataclasses import dataclass
 from typing import Any
 import requests
+
+_BLOCKED_STATUS = {400, 403, 429}
 
 
 # Map (inject_point, param_name) -> endpoint path
@@ -93,8 +96,9 @@ def _build_request_kwargs(p: dict) -> tuple[str, str, dict[str, Any]]:
 
     if inject == "header":
         url_path = _resolve_endpoint(inject, param)
+        base_params = p.get("base_params", {"q": "test"})
         return "GET", url_path, {
-            "params": {"q": "test"},
+            "params": base_params,
             "headers": {param: payload},
         }
 
@@ -104,14 +108,21 @@ def _build_request_kwargs(p: dict) -> tuple[str, str, dict[str, Any]]:
 def _login_for_session(waf_url: str, username: str = "alice", password: str = "alice123") -> requests.Session:
     s = requests.Session()
     try:
-        s.post(
+        resp = s.post(
             waf_url.rstrip("/") + "/login",
             data={"username": username, "password": password},
             timeout=5,
             allow_redirects=False,
         )
-    except requests.RequestException:
-        pass
+        if resp.status_code != 302:
+            print(
+                f"WARNING: login as '{username}' returned status {resp.status_code}; "
+                f"runner will operate unauthenticated. "
+                f"Endpoints requiring auth will likely fail.",
+                file=sys.stderr,
+            )
+    except requests.RequestException as e:
+        print(f"WARNING: login failed: {e}; runner will operate unauthenticated.", file=sys.stderr)
     return s
 
 
@@ -122,7 +133,7 @@ def _send_one(p: dict, waf_url: str, session: requests.Session) -> Result:
     try:
         resp = session.request(method, url, allow_redirects=False, timeout=10, **kwargs)
         latency = (time.time() - start) * 1000.0
-        blocked = resp.status_code in (403, 429, 400)
+        blocked = resp.status_code in _BLOCKED_STATUS
         return Result(
             payload_id=p["id"], category=p["category"], expected=p["expected"],
             blocked=blocked, status_code=resp.status_code, latency_ms=latency, error=None,

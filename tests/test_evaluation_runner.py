@@ -123,3 +123,31 @@ def test_unknown_inject_point_raises():
     }
     with pytest.raises(ValueError, match="inject_point"):
         _build_request_kwargs(payload)
+
+
+def test_build_header_request_uses_default_q():
+    payload = {
+        "id": "rl-001",
+        "payload": "1.2.3.4",
+        "category": "rate_limit",
+        "inject_point": "header",
+        "param_name": "X-Forwarded-For",
+    }
+    method, url_path, kwargs = _build_request_kwargs(payload)
+    assert method == "GET"
+    assert url_path == "/search"
+    assert kwargs["headers"] == {"X-Forwarded-For": "1.2.3.4"}
+    assert kwargs["params"] == {"q": "test"}
+
+
+def test_build_header_request_custom_base_params():
+    payload = {
+        "id": "rl-002",
+        "payload": "1.2.3.4",
+        "category": "rate_limit",
+        "inject_point": "header",
+        "param_name": "X-Forwarded-For",
+        "base_params": {"q": "hello"},
+    }
+    method, url_path, kwargs = _build_request_kwargs(payload)
+    assert kwargs["params"] == {"q": "hello"}
