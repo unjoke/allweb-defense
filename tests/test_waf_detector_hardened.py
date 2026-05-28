@@ -5,6 +5,7 @@ from waf.detector import (
     sanitize_xss,
     detect_path_traversal,
     detect_cmd_injection,
+    is_allowed_magic_bytes,
 )
 
 
@@ -124,3 +125,25 @@ def test_cmd_no_false_positive_price():
 
 def test_cmd_no_false_positive_email():
     assert detect_cmd_injection("user@domain.com") is False
+
+
+# ---------- 6.7 File upload magic bytes ----------
+
+def test_magic_png_pass():
+    assert is_allowed_magic_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 100) is True
+
+
+def test_magic_jpg_pass():
+    assert is_allowed_magic_bytes(b"\xff\xd8\xff\xe0" + b"\x00" * 100) is True
+
+
+def test_magic_gif_pass():
+    assert is_allowed_magic_bytes(b"GIF89a" + b"\x00" * 100) is True
+
+
+def test_magic_php_fail():
+    assert is_allowed_magic_bytes(b"<?php system($_GET['c']); ?>") is False
+
+
+def test_magic_empty_fail():
+    assert is_allowed_magic_bytes(b"") is False

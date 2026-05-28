@@ -16,6 +16,7 @@ from waf.detector import (
     detect_path_traversal,
     detect_sql_injection,
     is_allowed_extension,
+    is_allowed_magic_bytes,
     normalize,
     record_login_failure,
     sanitize_xss,
@@ -161,9 +162,17 @@ async def handle_request(request: web.Request, config: dict, logger: logging.Log
             return _blocked(403, "Forbidden")
 
     for field_name, filename in filenames:
-        if rules.get("file_upload", True) and not is_allowed_extension(filename):
-            _log_block(logger, "file-upload", ip, path, filename)
-            return _blocked(400, "Bad Request")
+        if rules.get("file_upload", True):
+            if not is_allowed_extension(filename):
+                _log_block(logger, "file-upload", ip, path, filename)
+                return _blocked(400, "Bad Request")
+            file_data = next(
+                (d for n, fn, ct, d in parts_data if n == field_name and fn == filename),
+                b"",
+            )
+            if file_data and not is_allowed_magic_bytes(file_data):
+                _log_block(logger, "file-upload-magic", ip, path, filename)
+                return _blocked(400, "Bad Request")
 
     # 4. XSS sanitize (not block)
     if rules.get("xss", True):

@@ -65,6 +65,19 @@ _CMD_CHARS = re.compile(
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"}
 
+_MAGIC_HEADERS = (
+    b"\x89PNG\r\n\x1a\n",
+    b"\xff\xd8\xff",
+    b"GIF87a",
+    b"GIF89a",
+)
+
+
+def is_allowed_magic_bytes(data: bytes) -> bool:
+    if not data:
+        return False
+    return any(data.startswith(magic) for magic in _MAGIC_HEADERS)
+
 
 def detect_sql_injection(value: str) -> bool:
     return bool(_SQL_PATTERN.search(value))
