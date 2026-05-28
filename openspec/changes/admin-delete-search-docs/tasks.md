@@ -8,7 +8,7 @@
 
 ## 2. /search 搜索框
 
-- [ ] 2.1 `shared/templates/search.html`：顶部加搜索表单，预填 q 值
+- [x] 2.1 `shared/templates/search.html`：顶部加搜索表单，预填 q 值
 
 ## 3. README 手动攻击方法
 

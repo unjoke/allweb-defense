@@ -10,6 +10,12 @@
 {% endblock %}
 {% block content %}
 <h4>// SEARCH RESULTS</h4>
+<form method="GET" action="/search" class="panel" style="margin-bottom:16px">
+  <div class="field" style="display:flex;gap:8px">
+    <input type="text" name="q" value="{{ q }}" placeholder="search messages..." style="flex:1">
+    <button class="btn" type="submit">SEARCH</button>
+  </div>
+</form>
 <p class="muted">关键词：<code>{{ q | safe }}</code></p>
 
 {% if results %}
