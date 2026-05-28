@@ -1,0 +1,203 @@
+# Path traversal payload library for WAF adversarial evaluation.
+# Target endpoint: /download?filename=<payload>
+# All entries are expected to be blocked by the WAF.
+
+- id: pt-001
+  payload: "../../etc/passwd"
+  category: path_traversal
+  technique: basic-dotdot
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-002
+  payload: "../../../etc/shadow"
+  category: path_traversal
+  technique: basic-dotdot
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-003
+  payload: "..%2fetc/passwd"
+  category: path_traversal
+  technique: url-encoded
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-004
+  payload: "..%2F..%2F..%2Fetc%2Fpasswd"
+  category: path_traversal
+  technique: url-encoded
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-005
+  payload: "..%252fetc/passwd"
+  category: path_traversal
+  technique: double-encoded
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-006
+  payload: "%252e%252e%252fetc%252fpasswd"
+  category: path_traversal
+  technique: double-encoded
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-007
+  payload: "..%c0%afetc/passwd"
+  category: path_traversal
+  technique: malformed-utf8
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-008
+  payload: "..%c1%1cetc/passwd"
+  category: path_traversal
+  technique: malformed-utf8
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-009
+  payload: "..%5c..%2fetc/passwd"
+  category: path_traversal
+  technique: mixed-separator
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-010
+  payload: "..\\..\\/etc/passwd"
+  category: path_traversal
+  technique: mixed-separator
+  difficulty: intermediate
+  source: custom
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-011
+  payload: "/etc/passwd"
+  category: path_traversal
+  technique: absolute-path
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-012
+  payload: "C:\\Windows\\System32\\drivers\\etc\\hosts"
+  category: path_traversal
+  technique: absolute-path
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-013
+  payload: "../../etc/passwd%00.png"
+  category: path_traversal
+  technique: null-byte
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-014
+  payload: "../../etc/passwd\x00.jpg"
+  category: path_traversal
+  technique: null-byte
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-015
+  payload: "....//etc/passwd"
+  category: path_traversal
+  technique: four-dot
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-016
+  payload: "....\\/etc/passwd"
+  category: path_traversal
+  technique: four-dot
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-017
+  payload: "..\\..\\etc\\passwd"
+  category: path_traversal
+  technique: backslash
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-018
+  payload: "..\\\\..\\\\etc\\\\passwd"
+  category: path_traversal
+  technique: backslash
+  difficulty: intermediate
+  source: custom
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-019
+  payload: "..%ef%bc%8fetc/passwd"
+  category: path_traversal
+  technique: utf8-overlong
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
+
+- id: pt-020
+  payload: "..%ef%bc%8f..%ef%bc%8fetc%ef%bc%8fpasswd"
+  category: path_traversal
+  technique: utf8-overlong
+  difficulty: advanced
+  source: custom
+  expected: blocked
+  inject_point: query_param
+  param_name: filename
