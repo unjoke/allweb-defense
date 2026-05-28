@@ -35,9 +35,11 @@ _SQL_PATTERN = re.compile(
 )
 
 _XSS_TAGS = re.compile(
-    r"<\s*(script|iframe|object|embed|form|input|button|link|meta|style|svg|math|img|div|span)"
+    r"<\s*(script|iframe|object|embed|form|input|button|link|meta|style|svg|math|img|div|span|body|details|marquee|video|audio|select|textarea|noscript)"
     r"|javascript\s*:"
-    r"|\bon\w+\s*=",
+    r"|\bon\w+\s*="
+    r"|&#(x0*[346][0-9a-f]|0*(60|62));?"
+    r"|data\s*:\s*text/html",
     re.IGNORECASE,
 )
 
