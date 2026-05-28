@@ -18,6 +18,8 @@ VALID_INJECT_POINTS = {"query_param", "form_body", "path", "header", "filename"}
 
 
 def validate(p: dict) -> None:
+    if not isinstance(p, dict):
+        raise ValueError(f"payload entry is not a dict: {p!r}")
     pid = p.get("id", "<no-id>")
     for field in REQUIRED_FIELDS:
         if field not in p:
@@ -36,7 +38,9 @@ def validate(p: dict) -> None:
 
 def load(path: str) -> list[dict]:
     text = Path(path).read_text(encoding="utf-8")
-    data = yaml.safe_load(text) or []
+    data = yaml.safe_load(text)
+    if data is None:
+        return []
     if not isinstance(data, list):
         raise ValueError(f"{path}: expected top-level list")
     for p in data:
