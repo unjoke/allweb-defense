@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% block title %}留言文件管理{% endblock %}
 {% block content %}
-<h4>留言文件管理 <span class="badge bg-warning text-dark">Admin</span></h4>
-<p class="text-muted">留言文件存储在服务器 <code>messages/</code> 目录，可在此删除。</p>
-<table class="table table-striped">
-  <thead><tr><th>文件名</th><th>操作</th></tr></thead>
+<h4>// MESSAGE FILES <span class="role admin" style="font-size:12px; margin-left:8px;">[ADMIN]</span></h4>
+<p class="muted">// 留言文件存储在服务器 <code>messages/</code> 目录</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>FILENAME</th>
+      <th>ACTION</th>
+    </tr>
+  </thead>
   <tbody>
     {% for fname in files %}
     <tr>
@@ -14,12 +20,13 @@
           {% if csrf_token is defined %}
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           {% endif %}
-          <!-- VULN: filename passed directly to subprocess rm -->
           <input type="hidden" name="filename" value="{{ fname }}">
-          <button type="submit" class="btn btn-sm btn-danger">删除文件</button>
+          <button type="submit" class="btn btn-sm btn-danger">DELETE</button>
         </form>
       </td>
     </tr>
+    {% else %}
+    <tr><td colspan="2" class="muted">// no files</td></tr>
     {% endfor %}
   </tbody>
 </table>
