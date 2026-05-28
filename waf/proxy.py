@@ -1,11 +1,13 @@
 import asyncio
 import logging
+import os
 import sys
 import urllib.parse
 from datetime import datetime
 
 import aiohttp
 from aiohttp import web
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from waf.config import load_config
 from waf.detector import (
@@ -19,6 +21,21 @@ from waf.detector import (
 )
 
 _rate_state: dict = {}
+
+_SHARED_TEMPLATES = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "shared", "templates"
+)
+_block_jinja = Environment(
+    loader=FileSystemLoader(_SHARED_TEMPLATES),
+    autoescape=select_autoescape(["html"]),
+)
+_block_jinja.globals["get_flashed_messages"] = lambda *a, **kw: []
+
+
+def _render_block_page(template_name: str, **ctx) -> str:
+    ctx.setdefault("session", {})
+    ctx.setdefault("mode", "vulnerable")
+    return _block_jinja.get_template(template_name).render(**ctx)
 
 SECURITY_HEADERS = {
     "Content-Security-Policy": "default-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net",
@@ -53,6 +70,13 @@ def _log_sanitized(logger, ip: str, path: str, payload: str) -> None:
 # --- response helpers ---
 
 def _blocked(status: int, msg: str) -> web.Response:
+    """Return a styled error page (uses shared/templates 403/429) when available, plain text otherwise."""
+    if status == 403:
+        body = _render_block_page("403.html", message=msg)
+        return web.Response(status=403, text=body, content_type="text/html")
+    if status == 429:
+        body = _render_block_page("429.html")
+        return web.Response(status=429, text=body, content_type="text/html")
     return web.Response(status=status, text=msg)
 
 
