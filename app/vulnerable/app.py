@@ -142,7 +142,8 @@ def messages():
     rows = db.execute(
         "SELECT * FROM messages ORDER BY created_at DESC"
     ).fetchall()
-    return render_template("messages.html", messages=rows, mode="vulnerable")
+    return render_template("messages.html", messages=rows, mode="vulnerable",
+                           current_role=session.get("role", ""))
 
 
 @app.route("/messages/delete", methods=["POST"])
@@ -152,7 +153,7 @@ def delete_message():
         return redir
     msg_id = request.form.get("msg_id")
     db = get_db()
-    # VULN: no ownership check — horizontal privilege escalation
+    # VULN: no role check — vertical privilege escalation (any logged-in user can delete)
     row = db.execute("SELECT * FROM messages WHERE id=?", (msg_id,)).fetchone()
     if row:
         if row["filepath"] and os.path.exists(row["filepath"]):

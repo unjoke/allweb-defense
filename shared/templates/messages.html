@@ -44,6 +44,7 @@
       <div class="msg-body">{{ msg.content | safe }}</div>
       <div class="msg-actions">
         <a class="btn btn-sm" href="/download?filename=msg_{{ msg.id }}_{{ msg.username }}.txt">DOWNLOAD</a>
+        {% if current_role == 'admin' %}
         <form method="POST" action="/messages/delete" style="display:inline">
           {% if csrf_token is defined %}
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -51,6 +52,7 @@
           <input type="hidden" name="msg_id" value="{{ msg.id }}">
           <button type="submit" class="btn btn-sm btn-danger">DELETE</button>
         </form>
+        {% endif %}
       </div>
     </div>
     {% else %}
