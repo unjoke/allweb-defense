@@ -1,7 +1,23 @@
 import re
 import os
 import time
+import urllib.parse
+import unicodedata
 from html import escape
+
+_INLINE_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
+
+
+def normalize(value: str) -> str:
+    decoded = value
+    for _ in range(3):
+        nxt = urllib.parse.unquote(decoded)
+        if nxt == decoded:
+            break
+        decoded = nxt
+    normalized = unicodedata.normalize("NFKC", decoded)
+    return _INLINE_COMMENT.sub("", normalized)
+
 
 _SQL_PATTERN = re.compile(
     r"\b(union|select|insert|update|delete|drop|create|alter|exec|execute"
@@ -10,22 +26,57 @@ _SQL_PATTERN = re.compile(
     r"|--[\s]"
     r"|;\s*(drop|insert|update|delete|select)"
     r"|'\s*(or|and)\s+'?\d"
-    r"|'\s*or\s*'",
+    r"|'\s*or\s*'"
+    r"|char\s*\("
+    r"|0x[0-9a-f]{6,}"
+    r"|`\s*(union|select|insert|update|delete|drop)\s*`"
+    r"|'\s*\|\|\s*'",
     re.IGNORECASE,
 )
 
 _XSS_TAGS = re.compile(
-    r"<\s*(script|iframe|object|embed|form|input|button|link|meta|style|svg|math|img|div|span)"
+    r"<\s*(script|iframe|object|embed|form|input|button|link|meta|style|svg|math|img|div|span|body|details|marquee|video|audio|select|textarea|noscript)"
     r"|javascript\s*:"
-    r"|\bon\w+\s*=",
+    r"|\bon\w+\s*="
+    r"|&#(x0*[346][0-9a-f]|0*(60|62));?"
+    r"|data\s*:\s*text/html",
     re.IGNORECASE,
 )
 
-_PATH_TRAVERSAL = re.compile(r"\.\.[/\\]|\.\.%2[fF]|\.\.%5[cC]")
+_PATH_TRAVERSAL = re.compile(
+    r"\.\.[/\\]"
+    r"|\.\.%2[fF]"
+    r"|\.\.%5[cC]"
+    r"|\.\.%252[fF]"
+    r"|\.\.%c0%af"
+    r"|\.\.%c1%1c"
+    r"|\.{4,}/+"
+    r"|\.\.%5c.*%2f"
+)
 
-_CMD_CHARS = re.compile(r"[;&|`$]|\$\(")
+_CMD_CHARS = re.compile(
+    r"[;&|`]"
+    r"|\$\("
+    r"|\$\{"
+    r"|\$[@*]"
+    r"|<\("
+    r"|\{[a-z]+,[^}]+\}"
+)
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"}
+
+_MAGIC_HEADERS = (
+    b"\x89PNG\r\n\x1a\n",
+    b"\xff\xd8\xff",
+    b"GIF87a",
+    b"GIF89a",
+)
+
+
+def is_allowed_magic_bytes(data: bytes) -> bool:
+    if not data:
+        return False
+    return any(data.startswith(magic) for magic in _MAGIC_HEADERS)
 
 
 def detect_sql_injection(value: str) -> bool:

@@ -291,4 +291,8 @@ def admin_delete_message_file():
 
 
 if __name__ == "__main__":
+    # WAF 旁路防御 — 方案 A（网络层隔离）：
+    # 后端必须绑定 127.0.0.1，禁止改为 0.0.0.0。
+    # 绑定外网地址后攻击者可直连 :5000 完全绕过 WAF 检测。
+    # 详见 README "WAF 旁路攻击与防御" 章节与对照实验。
     app.run(host="127.0.0.1", port=5000, debug=True)

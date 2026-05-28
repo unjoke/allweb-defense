@@ -422,3 +422,165 @@ python attacks/brute_force.py
 ```
 
 **预期结果**：漏洞版无频率限制，可无限尝试。当密码为 `admin123` 时返回 HTTP 302（登录成功）。防护版在超过阈值后返回 HTTP 429。
+
+---
+
+## WAF 旁路攻击与防御（Origin Bypass Protection）
+
+### 攻击模型
+
+```
+正常路径:   攻击者 ──► WAF :8080 ──► 后端 :5000  （流量被检测）
+旁路攻击:   攻击者 ─────────────────► 后端 :5000  （直连，绕过所有 WAF 规则）
+```
+
+只要攻击者通过任何方式发现 5000 端口暴露（DNS 历史、Shodan、证书透明度日志、子域名爆破等），整个 WAF 就形同虚设。这在业界叫 **WAF Origin Bypass / Direct-to-Origin Attack**，Cloudflare、AWS WAF、Akamai 都把它列为部署架构的头号风险。2025 年 Zafran 团队披露的 "BreakingWAF" 漏洞研究证实，约 40% 的真实部署存在此问题。
+
+### 业界主流方案对比
+
+| 方案 | 原理 | 优点 | 缺点 | 本项目 |
+|------|------|------|------|--------|
+| **A. 网络层隔离** | 后端只监听 127.0.0.1，不绑定外网 | 最彻底、零代码改动 | 单机部署可行，分布式需 VPC | ✅ 已实施 |
+| **B. 防火墙 IP 白名单** | iptables / Security Group 只允许 WAF IP | 操作系统级强制 | 跨平台麻烦 | ❌ 不实施 |
+| **C. 共享密钥头** | WAF 转发时加 `X-WAF-Secret`，后端校验 | 跨平台、可云部署 | 密钥泄露即失效 | 📋 Future Work |
+| **D. mTLS 双向证书** | WAF 持客户端证书，后端校验 | 最强加密 | 实现复杂 | 📋 Future Work |
+| **E. 请求签名（HMAC）** | WAF 用密钥签名，后端验签 | 防篡改 + 防重放 | 实现成本中等 | 📋 Future Work |
+
+本项目采用方案 A：在 `app/vulnerable/app.py` 与 `app/protected/app.py` 中显式绑定 `127.0.0.1`，物理上消除直连旁路的可能性。C/D/E 留作论文 Future Work。
+
+### 实验 1：旁路攻击有效性验证（基线）
+
+**目的**：证明后端绑定到外网时，WAF 形同虚设。
+
+```bash
+# 1. 临时改后端绑定为 0.0.0.0（仅实验用）
+# 编辑 app/vulnerable/app.py 末尾：
+#   app.run(host="0.0.0.0", port=5000, debug=True)
+
+# 2. 启动 WAF + 后端
+python -m waf &
+python -m app.vulnerable.app &
+
+# 3. 走 WAF 路径，确认被拦截
+curl -i "http://127.0.0.1:8080/search?q=' OR 1=1--"
+# 预期：HTTP/1.1 403 Forbidden（WAF 拦截）
+
+# 4. 从同网段另一台机器（或同机不同 IP）直连后端
+curl -i "http://<本机IP>:5000/search?q=' OR 1=1--"
+# 预期：HTTP/1.1 200 OK + SQL 错误信息（完全绕过 WAF）
+```
+
+**结论**：当后端绑定到外网可达地址时，攻击者只要发现 5000 端口，所有 WAF 规则立即失效。
+
+### 实验 2：方案 A 防御（绑定 127.0.0.1）
+
+**目的**：证明绑定 `127.0.0.1` 后无法直连旁路。
+
+```bash
+# 1. 恢复后端绑定为 127.0.0.1（项目默认值）
+# app/vulnerable/app.py 末尾：
+#   app.run(host="127.0.0.1", port=5000, debug=True)
+
+# 2. 启动 WAF + 后端
+python -m waf &
+python -m app.vulnerable.app &
+
+# 3. 从同网段另一台机器扫描
+nmap -p 5000 <本机IP>
+# 预期：5000/tcp closed/filtered（无法直连）
+
+# 4. 通过 WAF 走（127.0.0.1:5000 仅本机 WAF 进程可达）
+curl -i "http://127.0.0.1:8080/search?q=' OR 1=1--"
+# 预期：HTTP/1.1 403 Forbidden（WAF 正常拦截）
+```
+
+**结论**：方案 A 把后端从公网拉回到本机环回，物理上消除直连旁路的可能性。代价是后端必须与 WAF 同机部署；分布式场景下需配合方案 C/D/E。
+
+### 取舍说明
+
+本次只实施方案 A 的理由：
+
+- 方案 A 几乎零代码改动，主要工作是写文档、做对照实验
+- 方案 C/D/E 涉及密钥管理 / 证书体系 / 签名算法，与本项目主线（WAF 对抗性评估）正交
+- 把 C/D/E 留到 Future Work，反而能呈现"评估了完整方案矩阵，根据范围只实施 A"的工程判断力
+
+---
+
+## WAF 对抗性评估框架（evaluation/）
+
+`evaluation/` 目录提供自动化的对抗性 payload 评估能力，输出基线/加固对照报告。
+
+### 测试集规模
+
+| 类别 | 数量 | 覆盖技术 |
+|------|------|---------|
+| SQL 注入 | 31 | 大小写、注释、URL 编码、双重编码、NFKC、CHAR、十六进制、拼接、时间盲注、布尔盲注、括号、反引号、空白替换 |
+| XSS | 32 | script 标签、大小写、svg/img 事件、换行、HTML 实体、javascript:、Data URI、polyglot、mXSS、Unicode |
+| 路径穿越 | 20 | 基础 ../、URL 编码、双重编码、畸形 UTF-8、混合分隔符、绝对路径、null byte、四点、反斜杠、overlong UTF-8 |
+| 命令注入 | 27 | 分号、管道、反引号、`$()`、`${IFS}`、`$@`、`$*`、进程替换、brace expansion、转义、引号截断、通配符、base64 |
+| 文件上传 | 14 | 双扩展名、null byte、.phtml/.pht/.php5/.phar、大小写、magic bytes 伪装、Content-Type 谎报、polyglot 图片 |
+| 频率限制 | 5 | X-Forwarded-For 伪造、X-Real-IP 伪造、多值 XFF、慢速 burst、无头 baseline |
+| 干净集（误报） | 32 | 含 SQL 关键字的自然语言、含撇号的名字、价格、邮箱、URL 等 |
+| **合计** | **161** | |
+
+来源：HackTricks / PayloadsAllTheThings / PortSwigger Academy / OWASP
+
+### 启动 WAF + 后端
+
+```bash
+# 终端 1：启动漏洞版后端
+python -m app.vulnerable.app
+
+# 终端 2：启动 WAF 反向代理
+python -m waf
+```
+
+### 运行评估
+
+```bash
+# 完整基线评估（跳过速率限制，避免 5 分钟锁定）
+python -m evaluation baseline --skip-rate-limit
+
+# 完整加固后评估
+python -m evaluation hardened --skip-rate-limit
+
+# 仅跑误报集（每次加固后回归用）
+python -m evaluation baseline --category benign
+
+# 仅跑速率限制（需要等待 lockout 过期或重启 WAF）
+python -m evaluation baseline --category rate_limit
+```
+
+### 输出位置
+
+```
+evaluation/results/
+├── baseline-YYYY-MM-DD.md      # 基线评估报告（含 TPR/FPR/F1 表 + 失败 payload）
+├── hardened-YYYY-MM-DD.md      # 加固后评估报告
+├── comparison.md               # 对照表 + 加固总结
+└── figures/
+    ├── overall-baseline.png    # 基线分类柱状图
+    ├── overall-hardened.png    # 加固分类柱状图
+    ├── overall-comparison.png  # 对照柱状图（4 系列）
+    ├── confusion-baseline.png  # 基线混淆矩阵热图
+    └── confusion-hardened.png  # 加固混淆矩阵热图
+```
+
+### 关键结果
+
+| 指标 | 基线 | 加固后 | Δ |
+|------|------|--------|---|
+| Overall TPR | 61.3% | 71.8% | **+10.5pp** |
+| Overall FPR | 31.2% | 28.1% | **-3.1pp** |
+| SQL 注入 TPR | 74.2% | 93.5% | +19.4pp |
+| 路径穿越 TPR | 60.0% | 80.0% | +20.0pp |
+| 命令注入 TPR | 85.2% | 92.6% | +7.4pp |
+| 文件上传 TPR | 50.0% | 64.3% | +14.3pp |
+
+加固通过 8 个独立 commit 完成（`git log --oneline | grep "feat(waf)"`），每条规则改进单独验证 FPR 增长 ≤5pp。详见 `evaluation/results/comparison.md`。
+
+### 评估方法局限
+
+1. **XSS 通过净化（sanitize）而非拦截（block）实现**：WAF 对 XSS payload 返回 200 + 净化后的 HTML，而 runner 只按 status code 判定。这会低估 XSS 防御能力。完整评估需要解析响应体校验 payload 是否被净化。
+2. **rate_limit 类别需要重启 WAF 清除锁定状态**：默认 5 分钟锁定，runner 提供 `--skip-rate-limit` 选项。
+3. **测试集为白盒选取**：payload 来自已知绕过技术库，未覆盖未公开的 0day。
