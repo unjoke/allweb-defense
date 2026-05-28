@@ -189,3 +189,14 @@ document.querySelectorAll(".flash-close").forEach(btn => {
 | `asyncio.run()` 替换 `web.run_app()` 可能改变信号处理行为 | 添加 `SIGINT/SIGTERM` handler 优雅关闭两个 runner |
 | SSE 连接在文件不存在时崩溃 | 检查 log_path 存在，不存在时等待创建 |
 | Jinja2 模板路径在不同工作目录下失效 | 用 `__file__` 的绝对路径构建 loader |
+
+## Verification-time Patch: WAF 拦截响应主题化
+
+验证阶段发现 `proxy.py:_blocked()` 一直返回 `web.Response(text="Forbidden")`（plain text，9 字节）。原架构依赖 `app/protected/app.py` 的 `@errorhandler(403)` 渲染 403.html，但本次将演示路径改为 WAF 直接拦截后，Flask 不再有机会渲染——styled error pages 变成死代码，与「黑白主题完整覆盖」的目标矛盾。
+
+**修复**：在 `waf/proxy.py` 模块级初始化 Jinja2 Environment 指向 `shared/templates/`，添加 `_render_block_page()` helper；`_blocked(status, msg)` 在 status 为 403/429 时渲染对应模板返回 HTML（`text/html`），其他 status 退回原 plain text 行为。
+
+**注意**：`base.html` 引用了 Flask 专属的 `get_flashed_messages`，独立 Jinja2 渲染时需注入 stub `_block_jinja.globals["get_flashed_messages"] = lambda *a, **kw: []`。
+
+**结果**：403/429 响应从 9 字节 plain text 变为 ~6.4-6.5 KB 黑白主题 HTML，包含 WAF-DEMO 品牌、`var(--red)` 主题色、`FORBIDDEN`/`TOO MANY REQUESTS` 文案。已写回 OpenSpec delta `specs/waf-proxy/spec.md` 新增 acceptance scenarios。
+
