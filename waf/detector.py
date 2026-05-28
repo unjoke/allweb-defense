@@ -43,7 +43,16 @@ _XSS_TAGS = re.compile(
     re.IGNORECASE,
 )
 
-_PATH_TRAVERSAL = re.compile(r"\.\.[/\\]|\.\.%2[fF]|\.\.%5[cC]")
+_PATH_TRAVERSAL = re.compile(
+    r"\.\.[/\\]"
+    r"|\.\.%2[fF]"
+    r"|\.\.%5[cC]"
+    r"|\.\.%252[fF]"
+    r"|\.\.%c0%af"
+    r"|\.\.%c1%1c"
+    r"|\.{4,}/+"
+    r"|\.\.%5c.*%2f"
+)
 
 _CMD_CHARS = re.compile(r"[;&|`$]|\$\(")
 

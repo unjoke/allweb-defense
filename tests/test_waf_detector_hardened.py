@@ -79,3 +79,21 @@ def test_xss_body_onload():
 def test_xss_details_ontoggle():
     result = sanitize_xss("<details open ontoggle=alert(1)>")
     assert result != "<details open ontoggle=alert(1)>"
+
+
+# ---------- 6.5 Path traversal extended rules ----------
+
+def test_path_traversal_double_encoded():
+    assert detect_path_traversal("..%252fetc/passwd") is True
+
+
+def test_path_traversal_malformed_utf8():
+    assert detect_path_traversal("..%c0%afetc/passwd") is True
+
+
+def test_path_traversal_four_dot():
+    assert detect_path_traversal("....//etc/passwd") is True
+
+
+def test_path_traversal_normal_path():
+    assert detect_path_traversal("messages/msg_1.txt") is False
