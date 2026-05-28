@@ -1,10 +1,14 @@
 {% extends "base.html" %}
-{% block title %}429 请求过多{% endblock %}
+{% block title %}429 RATE LIMITED{% endblock %}
 {% block content %}
-<div class="text-center mt-5">
-  <h1 class="display-1 text-warning">429</h1>
-  <h4>请求过于频繁</h4>
-  <p class="text-muted">登录失败次数过多，请稍后再试。</p>
-  <a href="/login" class="btn btn-primary">返回登录</a>
+<div class="center" style="margin-top: 60px;">
+  <div style="text-align: center; max-width: 500px;">
+    <h1 style="font-size: 96px; color: var(--red); margin: 0; letter-spacing: 8px;">429</h1>
+    <h4 style="border: 0; color: var(--red); letter-spacing: 4px;">// TOO MANY REQUESTS</h4>
+    <p class="muted" style="margin: 24px 0;">
+      请求过于频繁，请稍后再试
+    </p>
+    <a href="/login" class="btn btn-danger">&larr; BACK TO LOGIN</a>
+  </div>
 </div>
 {% endblock %}
