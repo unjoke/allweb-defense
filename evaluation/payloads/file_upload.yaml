@@ -1,0 +1,158 @@
+# File upload bypass payloads for WAF adversarial evaluation
+# Techniques: double-extension, null-byte, php-alt-suffix, case-bypass,
+#             magic-bytes-spoof, content-type-lie, polyglot-image
+
+- id: upload-001
+  payload: "shell.php.jpg"
+  category: file_upload
+  technique: double-extension
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: png-magic-padding
+
+- id: upload-002
+  payload: "shell.asp.png"
+  category: file_upload
+  technique: double-extension
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: png-magic-padding
+
+- id: upload-003
+  payload: "shell.php%00.jpg"
+  category: file_upload
+  technique: null-byte
+  difficulty: intermediate
+  source: OWASP
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: png-magic-padding
+
+- id: upload-004
+  payload: "shell.php\\x00.png"
+  category: file_upload
+  technique: null-byte
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: png-magic-padding
+
+- id: upload-005
+  payload: "shell.phtml"
+  category: file_upload
+  technique: php-alt-suffix
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: php-payload
+
+- id: upload-006
+  payload: "shell.pht"
+  category: file_upload
+  technique: php-alt-suffix
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: php-payload
+
+- id: upload-007
+  payload: "shell.php5"
+  category: file_upload
+  technique: php-alt-suffix
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: php-payload
+
+- id: upload-008
+  payload: "shell.phar"
+  category: file_upload
+  technique: php-alt-suffix
+  difficulty: advanced
+  source: PortSwigger
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: php-payload
+
+- id: upload-009
+  payload: "shell.PHP"
+  category: file_upload
+  technique: case-bypass
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: php-payload
+
+- id: upload-010
+  payload: "shell.PhP"
+  category: file_upload
+  technique: case-bypass
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: php-payload
+
+- id: upload-011
+  payload: "avatar.png"
+  category: file_upload
+  technique: magic-bytes-spoof
+  difficulty: advanced
+  source: PortSwigger
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: php-payload
+
+- id: upload-012
+  payload: "avatar.jpg"
+  category: file_upload
+  technique: magic-bytes-spoof
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: php-payload
+
+- id: upload-013
+  payload: "shell.php"
+  category: file_upload
+  technique: content-type-lie
+  difficulty: intermediate
+  source: OWASP
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: png-magic-padding
+  file_content_type: "image/png"
+
+- id: upload-014
+  payload: "avatar.png"
+  category: file_upload
+  technique: polyglot-image
+  difficulty: advanced
+  source: PortSwigger
+  expected: blocked
+  inject_point: filename
+  param_name: avatar
+  file_content: polyglot-png-php
