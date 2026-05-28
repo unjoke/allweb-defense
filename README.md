@@ -422,3 +422,84 @@ python attacks/brute_force.py
 ```
 
 **预期结果**：漏洞版无频率限制，可无限尝试。当密码为 `admin123` 时返回 HTTP 302（登录成功）。防护版在超过阈值后返回 HTTP 429。
+
+---
+
+## WAF 旁路攻击与防御（Origin Bypass Protection）
+
+### 攻击模型
+
+```
+正常路径:   攻击者 ──► WAF :8080 ──► 后端 :5000  （流量被检测）
+旁路攻击:   攻击者 ─────────────────► 后端 :5000  （直连，绕过所有 WAF 规则）
+```
+
+只要攻击者通过任何方式发现 5000 端口暴露（DNS 历史、Shodan、证书透明度日志、子域名爆破等），整个 WAF 就形同虚设。这在业界叫 **WAF Origin Bypass / Direct-to-Origin Attack**，Cloudflare、AWS WAF、Akamai 都把它列为部署架构的头号风险。2025 年 Zafran 团队披露的 "BreakingWAF" 漏洞研究证实，约 40% 的真实部署存在此问题。
+
+### 业界主流方案对比
+
+| 方案 | 原理 | 优点 | 缺点 | 本项目 |
+|------|------|------|------|--------|
+| **A. 网络层隔离** | 后端只监听 127.0.0.1，不绑定外网 | 最彻底、零代码改动 | 单机部署可行，分布式需 VPC | ✅ 已实施 |
+| **B. 防火墙 IP 白名单** | iptables / Security Group 只允许 WAF IP | 操作系统级强制 | 跨平台麻烦 | ❌ 不实施 |
+| **C. 共享密钥头** | WAF 转发时加 `X-WAF-Secret`，后端校验 | 跨平台、可云部署 | 密钥泄露即失效 | 📋 Future Work |
+| **D. mTLS 双向证书** | WAF 持客户端证书，后端校验 | 最强加密 | 实现复杂 | 📋 Future Work |
+| **E. 请求签名（HMAC）** | WAF 用密钥签名，后端验签 | 防篡改 + 防重放 | 实现成本中等 | 📋 Future Work |
+
+本项目采用方案 A：在 `app/vulnerable/app.py` 与 `app/protected/app.py` 中显式绑定 `127.0.0.1`，物理上消除直连旁路的可能性。C/D/E 留作论文 Future Work。
+
+### 实验 1：旁路攻击有效性验证（基线）
+
+**目的**：证明后端绑定到外网时，WAF 形同虚设。
+
+```bash
+# 1. 临时改后端绑定为 0.0.0.0（仅实验用）
+# 编辑 app/vulnerable/app.py 末尾：
+#   app.run(host="0.0.0.0", port=5000, debug=True)
+
+# 2. 启动 WAF + 后端
+python -m waf &
+python -m app.vulnerable.app &
+
+# 3. 走 WAF 路径，确认被拦截
+curl -i "http://127.0.0.1:8080/search?q=' OR 1=1--"
+# 预期：HTTP/1.1 403 Forbidden（WAF 拦截）
+
+# 4. 从同网段另一台机器（或同机不同 IP）直连后端
+curl -i "http://<本机IP>:5000/search?q=' OR 1=1--"
+# 预期：HTTP/1.1 200 OK + SQL 错误信息（完全绕过 WAF）
+```
+
+**结论**：当后端绑定到外网可达地址时，攻击者只要发现 5000 端口，所有 WAF 规则立即失效。
+
+### 实验 2：方案 A 防御（绑定 127.0.0.1）
+
+**目的**：证明绑定 `127.0.0.1` 后无法直连旁路。
+
+```bash
+# 1. 恢复后端绑定为 127.0.0.1（项目默认值）
+# app/vulnerable/app.py 末尾：
+#   app.run(host="127.0.0.1", port=5000, debug=True)
+
+# 2. 启动 WAF + 后端
+python -m waf &
+python -m app.vulnerable.app &
+
+# 3. 从同网段另一台机器扫描
+nmap -p 5000 <本机IP>
+# 预期：5000/tcp closed/filtered（无法直连）
+
+# 4. 通过 WAF 走（127.0.0.1:5000 仅本机 WAF 进程可达）
+curl -i "http://127.0.0.1:8080/search?q=' OR 1=1--"
+# 预期：HTTP/1.1 403 Forbidden（WAF 正常拦截）
+```
+
+**结论**：方案 A 把后端从公网拉回到本机环回，物理上消除直连旁路的可能性。代价是后端必须与 WAF 同机部署；分布式场景下需配合方案 C/D/E。
+
+### 取舍说明
+
+本次只实施方案 A 的理由：
+
+- 方案 A 几乎零代码改动，主要工作是写文档、做对照实验
+- 方案 C/D/E 涉及密钥管理 / 证书体系 / 签名算法，与本项目主线（WAF 对抗性评估）正交
+- 把 C/D/E 留到 Future Work，反而能呈现"评估了完整方案矩阵，根据范围只实施 A"的工程判断力
