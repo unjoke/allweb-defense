@@ -1,0 +1,323 @@
+# Benign payloads for false-positive-rate (FPR) testing of WAF.
+# These contain words/characters a naive regex might flag, but they are
+# legitimate user input and must be allowed.
+
+- id: benign-001
+  payload: "Flask tutorial"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-002
+  payload: "Python web development"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-003
+  payload: "how to select a date"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-004
+  payload: "select a date for the meeting"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-005
+  payload: "drop me a line when you arrive"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-006
+  payload: "union of workers rally tomorrow"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-007
+  payload: "delete old emails from inbox"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-008
+  payload: "update my profile picture"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-009
+  payload: "insert coin to continue"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-010
+  payload: "where to order takeout"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-011
+  payload: "O'Brien"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-012
+  payload: "McDonald's menu"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-013
+  payload: "it's a test"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-014
+  payload: "Don't worry about it"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-015
+  payload: "use angle brackets < and >"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-016
+  payload: "a > b comparison"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-017
+  payload: "5 < 10 is true"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-018
+  payload: "my_report.pdf"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-019
+  payload: "avatar (1).png"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-020
+  payload: "documents/2024/report.docx"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-021
+  payload: "https://example.com/path?q=hello"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-022
+  payload: "visit https://www.python.org for docs"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-023
+  payload: "SELECT * FROM table is the basic SQL syntax"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-024
+  payload: "function() { return 1; }"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-025
+  payload: "console.log forum post"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-026
+  payload: "price: $19.99"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-027
+  payload: "email: user@domain.com"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-028
+  payload: "phone: (555) 123-4567"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-029
+  payload: "best restaurants near me"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-030
+  payload: "weather forecast for tomorrow"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-031
+  payload: "What is the meaning of life?"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
+
+- id: benign-032
+  payload: "100% organic cotton t-shirt"
+  category: benign
+  technique: normal-usage
+  difficulty: basic
+  source: custom
+  expected: allowed
+  inject_point: query_param
+  param_name: q
