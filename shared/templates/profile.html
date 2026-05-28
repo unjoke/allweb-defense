@@ -1,37 +1,35 @@
 {% extends "base.html" %}
 {% block title %}个人设置{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <h4>个人设置</h4>
-    <div class="card mb-4">
-      <div class="card-header">修改密码</div>
-      <div class="card-body">
-        <form method="POST" action="/profile/password">
-          {% if csrf_token is defined %}
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          {% endif %}
-          <div class="mb-3">
-            <label class="form-label">新密码</label>
-            <input type="password" name="new_password" class="form-control" required>
-          </div>
-          <button type="submit" class="btn btn-warning">修改密码</button>
-        </form>
-      </div>
+<div class="center">
+  <div style="width: 480px;">
+    <h4>// PROFILE</h4>
+
+    <div class="panel">
+      <h5 class="panel-title">CHANGE PASSWORD</h5>
+      <form method="POST" action="/profile/password">
+        {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <div class="field">
+          <label>NEW PASSWORD</label>
+          <input type="password" name="new_password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">UPDATE PASSWORD</button>
+      </form>
     </div>
-    <div class="card">
-      <div class="card-header">上传头像</div>
-      <div class="card-body">
-        <form method="POST" action="/profile/avatar" enctype="multipart/form-data">
-          {% if csrf_token is defined %}
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          {% endif %}
-          <div class="mb-3">
-            <input type="file" name="avatar" class="form-control">
-          </div>
-          <button type="submit" class="btn btn-secondary">上传</button>
-        </form>
-      </div>
+
+    <div class="panel">
+      <h5 class="panel-title">UPLOAD AVATAR</h5>
+      <form method="POST" action="/profile/avatar" enctype="multipart/form-data">
+        {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <div class="field">
+          <input type="file" name="avatar">
+        </div>
+        <button type="submit" class="btn">UPLOAD FILE</button>
+      </form>
     </div>
   </div>
 </div>
