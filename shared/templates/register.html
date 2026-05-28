@@ -1,32 +1,32 @@
 {% extends "base.html" %}
 {% block title %}注册{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-4">
-    <div class="card shadow">
-      <div class="card-header bg-success text-white"><h5 class="mb-0">用户注册</h5></div>
-      <div class="card-body">
-        <form method="POST" action="/register">
-          {% if csrf_token is defined %}
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          {% endif %}
-          <div class="mb-3">
-            <label class="form-label">用户名</label>
-            <input type="text" name="username" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">密码</label>
-            <input type="password" name="password" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">邮箱</label>
-            <input type="email" name="email" class="form-control">
-          </div>
-          <button type="submit" class="btn btn-success w-100">注册</button>
-        </form>
-        <hr>
-        <p class="text-center mb-0"><a href="/login">已有账号？登录</a></p>
-      </div>
+<div class="center">
+  <div style="width: 360px;">
+    <h4>// REGISTER</h4>
+    <div class="panel">
+      <form method="POST" action="/register">
+        {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <div class="field">
+          <label>USERNAME</label>
+          <input type="text" name="username" required autofocus>
+        </div>
+        <div class="field">
+          <label>PASSWORD</label>
+          <input type="password" name="password" required>
+        </div>
+        <div class="field">
+          <label>EMAIL</label>
+          <input type="email" name="email">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">CREATE ACCOUNT</button>
+      </form>
+      <hr>
+      <p class="muted" style="text-align:center; margin:0;">
+        已有账号？<a href="/login">直接登录</a>
+      </p>
     </div>
   </div>
 </div>

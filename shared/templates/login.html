@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 {% block title %}登录{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-4">
-    <div class="card shadow">
-      <div class="card-header bg-primary text-white"><h5 class="mb-0">用户登录</h5></div>
-      <div class="card-body">
-        <form method="POST" action="/login">
-          {% if csrf_token is defined %}
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          {% endif %}
-          <div class="mb-3">
-            <label class="form-label">用户名</label>
-            <input type="text" name="username" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">密码</label>
-            <input type="password" name="password" class="form-control" required>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">登录</button>
-        </form>
-        <hr>
-        <p class="text-center mb-0"><a href="/register">没有账号？注册</a></p>
-      </div>
+<div class="center">
+  <div style="width: 360px;">
+    <h4>// LOGIN</h4>
+    <div class="panel">
+      <form method="POST" action="/login">
+        {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <div class="field">
+          <label>USERNAME</label>
+          <input type="text" name="username" required autofocus>
+        </div>
+        <div class="field">
+          <label>PASSWORD</label>
+          <input type="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">LOG IN</button>
+      </form>
+      <hr>
+      <p class="muted" style="text-align:center; margin:0;">
+        没有账号？<a href="/register">注册新用户</a>
+      </p>
     </div>
   </div>
 </div>
