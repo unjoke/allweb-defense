@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>WAF DASHBOARD :8081</title>
+<style>
+  :root {
+    --bg: #0a0a0a; --bg-2: #111; --bg-3: #1a1a1a;
+    --fg: #e8e8e8; --fg-dim: #888;
+    --red: #ff3333; --green: #00ff41;
+    --border: #333; --border-bright: #555;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: 'Consolas', 'Courier New', monospace;
+    margin: 0; padding: 0;
+    border-top: 2px solid var(--red);
+  }
+  header {
+    background: var(--bg-2);
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 {
+    margin: 0; font-size: 18px; letter-spacing: 2px;
+    color: var(--fg); font-weight: bold;
+  }
+  header .meta { color: var(--fg-dim); font-size: 13px; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel {
+    padding: 20px 24px;
+  }
+  .panel + .panel { border-left: 1px solid var(--border); }
+  .panel h2 {
+    margin: 0 0 16px 0; font-size: 13px;
+    letter-spacing: 2px; color: var(--fg-dim);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px; font-weight: normal;
+  }
+  .rule-row, .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+  }
+  .rule-row + .rule-row, .stat-row + .stat-row {
+    border-top: 1px dashed var(--border);
+  }
+  .rule-name, .stat-name { color: var(--fg); }
+  .rule-status.on { color: var(--green); }
+  .rule-status.off { color: var(--red); }
+  .stat-value {
+    color: var(--fg); font-weight: bold;
+    min-width: 40px; text-align: right;
+  }
+  .log-section {
+    padding: 20px 24px;
+  }
+  .log-section h2 {
+    margin: 0 0 16px 0; font-size: 13px;
+    letter-spacing: 2px; color: var(--fg-dim);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px; font-weight: normal;
+  }
+  #log {
+    list-style: none; margin: 0; padding: 0;
+    max-height: 60vh; overflow-y: auto;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+  }
+  #log li {
+    padding: 6px 12px; font-size: 13px;
+    border-bottom: 1px dashed var(--border);
+    white-space: pre-wrap; word-break: break-all;
+  }
+  #log li:hover { background: var(--bg-3); }
+  #log li.empty { color: var(--fg-dim); font-style: italic; }
+  .badge { color: var(--red); font-weight: bold; }
+  .conn-status {
+    display: inline-block; width: 8px; height: 8px;
+    background: var(--green); margin-right: 6px;
+    vertical-align: middle;
+  }
+  .conn-status.disconnected { background: var(--red); }
+</style>
+</head>
+<body>
+<header>
+  <h1>&gt; WAF DASHBOARD</h1>
+  <div class="meta">
+    <span id="conn-indicator" class="conn-status"></span>
+    <span id="conn-text">CONNECTING...</span>
+    &nbsp;:8081
+  </div>
+</header>
+
+<div class="grid">
+  <div class="panel">
+    <h2>// RULES</h2>
+    {% for name, enabled in rules.items() %}
+    <div class="rule-row">
+      <span class="rule-name">{{ name }}</span>
+      <span class="rule-status {{ 'on' if enabled else 'off' }}">
+        [{{ 'ON ' if enabled else 'OFF' }}]
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="panel">
+    <h2>// ATTACK STATS</h2>
+    {% for name, count in stats.items() %}
+    <div class="stat-row">
+      <span class="stat-name">{{ name }}</span>
+      <span class="stat-value" data-stat="{{ name }}">[{{ '%4d' % count }}]</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="log-section">
+  <h2>// LIVE LOG</h2>
+  <ul id="log">
+    <li class="empty">waiting for events...</li>
+  </ul>
+</div>
+
+<script>
+(function () {
+  const logEl = document.getElementById("log");
+  const connIndicator = document.getElementById("conn-indicator");
+  const connText = document.getElementById("conn-text");
+  const MAX_LINES = 100;
+  let emptyRemoved = false;
+
+  function setConnected(ok) {
+    if (ok) {
+      connIndicator.classList.remove("disconnected");
+      connText.textContent = "LIVE";
+    } else {
+      connIndicator.classList.add("disconnected");
+      connText.textContent = "DISCONNECTED";
+    }
+  }
+
+  function bumpStat(type) {
+    const el = document.querySelector('[data-stat="' + type + '"]');
+    if (!el) return;
+    const m = el.textContent.match(/\d+/);
+    const next = (m ? parseInt(m[0], 10) : 0) + 1;
+    el.textContent = "[" + String(next).padStart(4, " ") + "]";
+  }
+
+  function prependLog(line) {
+    if (!emptyRemoved) {
+      logEl.innerHTML = "";
+      emptyRemoved = true;
+    }
+    const li = document.createElement("li");
+    li.textContent = "> " + line;
+    logEl.insertBefore(li, logEl.firstChild);
+    while (logEl.children.length > MAX_LINES) {
+      logEl.removeChild(logEl.lastChild);
+    }
+  }
+
+  const es = new EventSource("/events");
+  es.onopen = () => setConnected(true);
+  es.onerror = () => setConnected(false);
+  es.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.line) prependLog(data.line);
+      if (data.type) bumpStat(data.type);
+    } catch (err) {
+      prependLog(e.data);
+    }
+  };
+})();
+</script>
+</body>
+</html>
