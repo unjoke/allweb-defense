@@ -1,0 +1,270 @@
+- id: cmd-001
+  payload: "msg_1.txt; id"
+  category: cmd_injection
+  technique: semicolon
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-002
+  payload: "msg_1.txt; cat /etc/passwd"
+  category: cmd_injection
+  technique: semicolon
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-003
+  payload: "msg_1.txt | id"
+  category: cmd_injection
+  technique: pipe
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-004
+  payload: "msg_1.txt | cat /etc/passwd"
+  category: cmd_injection
+  technique: pipe
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-005
+  payload: "msg_1.txt `id`"
+  category: cmd_injection
+  technique: backtick
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-006
+  payload: "msg_1.txt `whoami`"
+  category: cmd_injection
+  technique: backtick
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-007
+  payload: "msg_1.txt $(id)"
+  category: cmd_injection
+  technique: dollar-paren
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-008
+  payload: "msg_1.txt $(cat /etc/passwd)"
+  category: cmd_injection
+  technique: dollar-paren
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-009
+  payload: "msg_1.txt;cat${IFS}/etc/passwd"
+  category: cmd_injection
+  technique: ifs-variable
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-010
+  payload: "${IFS}id"
+  category: cmd_injection
+  technique: ifs-variable
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-011
+  payload: "msg_1.txt;$@cat /etc/passwd"
+  category: cmd_injection
+  technique: dollar-at
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-012
+  payload: "msg_1.txt;$*cat /etc/passwd"
+  category: cmd_injection
+  technique: dollar-star
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-013
+  payload: "<(cat /etc/passwd)"
+  category: cmd_injection
+  technique: process-substitution
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-014
+  payload: "msg_1.txt;cat <(id)"
+  category: cmd_injection
+  technique: process-substitution
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-015
+  payload: "{cat,/etc/passwd}"
+  category: cmd_injection
+  technique: brace-expansion
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-016
+  payload: "msg_1.txt;{ls,-la}"
+  category: cmd_injection
+  technique: brace-expansion
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-017
+  payload: "msg_1.txt;c\\at /etc/passwd"
+  category: cmd_injection
+  technique: backslash-escape
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-018
+  payload: "msg_1.txt;wh\\oami"
+  category: cmd_injection
+  technique: backslash-escape
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-019
+  payload: "msg_1.txt;\"who\"ami"
+  category: cmd_injection
+  technique: quote-truncation
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-020
+  payload: "msg_1.txt;'cat' /etc/passwd"
+  category: cmd_injection
+  technique: quote-truncation
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-021
+  payload: "msg_1.txt;/???/p?sswd"
+  category: cmd_injection
+  technique: wildcard
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-022
+  payload: "msg_1.txt;cat /etc/p*"
+  category: cmd_injection
+  technique: wildcard
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-023
+  payload: "msg_1.txt;echo aWQ= | base64 -d | sh"
+  category: cmd_injection
+  technique: base64-decode
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-024
+  payload: "msg_1.txt%0aid"
+  category: cmd_injection
+  technique: newline
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-025
+  payload: "msg_1.txt\nid"
+  category: cmd_injection
+  technique: newline
+  difficulty: intermediate
+  source: OWASP
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-026
+  payload: "msg_1.txt && id"
+  category: cmd_injection
+  technique: ampersand
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
+- id: cmd-027
+  payload: "msg_1.txt & id"
+  category: cmd_injection
+  technique: ampersand
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: form_body
+  param_name: filename
+
