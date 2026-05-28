@@ -1,7 +1,23 @@
 import re
 import os
 import time
+import urllib.parse
+import unicodedata
 from html import escape
+
+_INLINE_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
+
+
+def normalize(value: str) -> str:
+    decoded = value
+    for _ in range(3):
+        nxt = urllib.parse.unquote(decoded)
+        if nxt == decoded:
+            break
+        decoded = nxt
+    normalized = unicodedata.normalize("NFKC", decoded)
+    return _INLINE_COMMENT.sub("", normalized)
+
 
 _SQL_PATTERN = re.compile(
     r"\b(union|select|insert|update|delete|drop|create|alter|exec|execute"
