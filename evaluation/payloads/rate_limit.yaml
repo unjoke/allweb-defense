@@ -1,0 +1,66 @@
+# Rate limit bypass payloads for WAF adversarial evaluation
+# Techniques: xff-spoof, x-real-ip-spoof, multi-xff, slow-burst, no-header-baseline
+
+- id: rl-001
+  payload: "X-Forwarded-For spoof with single fake IP"
+  category: rate_limit
+  technique: xff-spoof
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: header
+  param_name: X-Forwarded-For
+  burst_count: 12
+  headers:
+    X-Forwarded-For: "1.2.3.4"
+
+- id: rl-002
+  payload: "X-Real-IP spoof to bypass per-IP rate limit"
+  category: rate_limit
+  technique: x-real-ip-spoof
+  difficulty: basic
+  source: PortSwigger
+  expected: blocked
+  inject_point: header
+  param_name: X-Real-IP
+  burst_count: 12
+  headers:
+    X-Real-IP: "5.6.7.8"
+
+- id: rl-003
+  payload: "X-Forwarded-For with multiple chained fake IPs"
+  category: rate_limit
+  technique: multi-xff
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: header
+  param_name: X-Forwarded-For
+  burst_count: 12
+  headers:
+    X-Forwarded-For: "1.1.1.1, 2.2.2.2, 3.3.3.3"
+
+- id: rl-004
+  payload: "Burst at threshold (11) to confirm trigger boundary"
+  category: rate_limit
+  technique: slow-burst
+  difficulty: intermediate
+  source: custom
+  expected: blocked
+  inject_point: header
+  param_name: X-Forwarded-For
+  burst_count: 11
+  headers:
+    X-Forwarded-For: "9.9.9.9"
+
+- id: rl-005
+  payload: "Baseline burst with no spoof headers"
+  category: rate_limit
+  technique: no-header-baseline
+  difficulty: basic
+  source: custom
+  expected: blocked
+  inject_point: header
+  param_name: X-Forwarded-For
+  burst_count: 12
+  headers: {}
