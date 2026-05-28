@@ -16,6 +16,7 @@ from waf.detector import (
     detect_path_traversal,
     detect_sql_injection,
     is_allowed_extension,
+    normalize,
     record_login_failure,
     sanitize_xss,
 )
@@ -148,13 +149,14 @@ async def handle_request(request: web.Request, config: dict, logger: logging.Log
 
     # 3. Detection (block on first hit)
     for key, val in all_string_params.items():
-        if rules.get("sql_injection", True) and detect_sql_injection(val):
+        nval = normalize(val)
+        if rules.get("sql_injection", True) and detect_sql_injection(nval):
             _log_block(logger, "sql-injection", ip, path, val)
             return _blocked(403, "Forbidden")
-        if rules.get("path_traversal", True) and detect_path_traversal(val):
+        if rules.get("path_traversal", True) and detect_path_traversal(nval):
             _log_block(logger, "path-traversal", ip, path, val)
             return _blocked(403, "Forbidden")
-        if rules.get("cmd_injection", True) and detect_cmd_injection(val):
+        if rules.get("cmd_injection", True) and detect_cmd_injection(nval):
             _log_block(logger, "cmd-injection", ip, path, val)
             return _blocked(403, "Forbidden")
 
@@ -167,15 +169,17 @@ async def handle_request(request: web.Request, config: dict, logger: logging.Log
     if rules.get("xss", True):
         sanitized_get = {}
         for k, v in get_params.items():
-            sv = sanitize_xss(v)
-            if sv != v:
+            nv = normalize(v)
+            sv = sanitize_xss(nv)
+            if sv != nv:
                 _log_sanitized(logger, ip, path, v)
             sanitized_get[k] = sv
 
         sanitized_post = {}
         for k, v in post_params.items():
-            sv = sanitize_xss(v)
-            if sv != v:
+            nv = normalize(v)
+            sv = sanitize_xss(nv)
+            if sv != nv:
                 _log_sanitized(logger, ip, path, v)
             sanitized_post[k] = sv
     else:
