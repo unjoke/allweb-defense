@@ -26,7 +26,11 @@ _SQL_PATTERN = re.compile(
     r"|--[\s]"
     r"|;\s*(drop|insert|update|delete|select)"
     r"|'\s*(or|and)\s+'?\d"
-    r"|'\s*or\s*'",
+    r"|'\s*or\s*'"
+    r"|char\s*\("
+    r"|0x[0-9a-f]{6,}"
+    r"|`\s*(union|select|insert|update|delete|drop)\s*`"
+    r"|'\s*\|\|\s*'",
     re.IGNORECASE,
 )
 
