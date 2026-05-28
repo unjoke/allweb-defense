@@ -2,6 +2,8 @@
 comet_change: waf-ui-redesign
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-05-28-waf-ui-redesign
+status: final
 ---
 
 # WAF UI Redesign — Technical Design

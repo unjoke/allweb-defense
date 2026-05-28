@@ -2,6 +2,7 @@
 change: waf-ui-redesign
 design-doc: docs/superpowers/specs/2026-05-27-waf-ui-redesign-design.md
 base-ref: 4ff8705e9251671669abc8d70986345c53211e10
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 # WAF UI Redesign Implementation Plan
@@ -14,6 +15,7 @@ base-ref: 4ff8705e9251671669abc8d70986345c53211e10
 
 **Tech Stack:** Python 3.12 + aiohttp + Jinja2（已存在）+ 纯 HTML/CSS/JS（无外部框架）
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 1: WAF Dashboard 后端模块
@@ -135,6 +137,7 @@ git add waf/dashboard.py
 git commit -m "feat(waf): add dashboard module with SSE log stream and stats"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 2: Dashboard HTML 模板
@@ -344,6 +347,7 @@ git add waf/templates/dashboard.html
 git commit -m "feat(waf): add dashboard.html template with SSE client"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 3: 修改 proxy.py 双服务启动
@@ -447,6 +451,7 @@ git add waf/proxy.py
 git commit -m "feat(waf): start proxy and dashboard on shared event loop"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 4: Dashboard 端到端验证
@@ -501,6 +506,7 @@ curl "http://127.0.0.1:8080/download?filename=../../etc/passwd"
 
 两个终端 Ctrl+C 即可。如果以上 4 步全部通过，进入下一个 Task。如有问题，回到 Task 1-3 检查代码。
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 5: 重写 base.html — 黑白主题基础层
@@ -716,6 +722,7 @@ git add shared/templates/base.html
 git commit -m "feat(theme): rewrite base.html with black/white sharp theme"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 6: 重写 login.html 和 register.html
@@ -804,6 +811,7 @@ git add shared/templates/login.html shared/templates/register.html
 git commit -m "feat(theme): rewrite login/register templates"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 7: 重写 messages.html 和 search.html
@@ -933,6 +941,7 @@ git add shared/templates/messages.html shared/templates/search.html
 git commit -m "feat(theme): rewrite messages/search templates"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 8: 重写 profile.html
@@ -989,6 +998,7 @@ git add shared/templates/profile.html
 git commit -m "feat(theme): rewrite profile template"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 9: 重写 admin_users.html 和 admin_messages.html
@@ -1091,6 +1101,7 @@ git add shared/templates/admin_users.html shared/templates/admin_messages.html
 git commit -m "feat(theme): rewrite admin pages with sharp tabular style"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 10: 重写错误页 403.html 和 429.html
@@ -1145,6 +1156,7 @@ git add shared/templates/403.html shared/templates/429.html
 git commit -m "feat(theme): rewrite 403/429 error pages"
 ```
 
+archived-with: 2026-05-28-waf-ui-redesign
 ---
 
 ## Task 11: 端到端验证整个系统
