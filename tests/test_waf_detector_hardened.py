@@ -97,3 +97,30 @@ def test_path_traversal_four_dot():
 
 def test_path_traversal_normal_path():
     assert detect_path_traversal("messages/msg_1.txt") is False
+
+
+# ---------- 6.6 Cmd injection extended rules ----------
+
+def test_cmd_ifs_variable():
+    assert detect_cmd_injection("cat${IFS}/etc/passwd") is True
+
+
+def test_cmd_process_substitution():
+    assert detect_cmd_injection("<(cat /etc/passwd)") is True
+
+
+def test_cmd_brace_expansion():
+    assert detect_cmd_injection("{cat,/etc/passwd}") is True
+
+
+def test_cmd_dollar_at():
+    assert detect_cmd_injection("$@") is True
+
+
+def test_cmd_no_false_positive_price():
+    # "$19.99" should NOT trigger (no $( or ${ or $@ or $*)
+    assert detect_cmd_injection("$19.99") is False
+
+
+def test_cmd_no_false_positive_email():
+    assert detect_cmd_injection("user@domain.com") is False

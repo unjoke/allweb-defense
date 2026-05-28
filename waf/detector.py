@@ -54,7 +54,14 @@ _PATH_TRAVERSAL = re.compile(
     r"|\.\.%5c.*%2f"
 )
 
-_CMD_CHARS = re.compile(r"[;&|`$]|\$\(")
+_CMD_CHARS = re.compile(
+    r"[;&|`]"
+    r"|\$\("
+    r"|\$\{"
+    r"|\$[@*]"
+    r"|<\("
+    r"|\{[a-z]+,[^}]+\}"
+)
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"}
 
