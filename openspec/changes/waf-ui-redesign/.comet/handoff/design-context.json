@@ -1,0 +1,16 @@
+{
+  "change": "waf-ui-redesign",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "e7a7032e8b48d269e3efa485c97988d9c4008cf8f87c65f82d12f0fba3b2252c",
+  "files": [
+    { "path": "openspec/changes/waf-ui-redesign/proposal.md", "sha256": "71c4334e7991a18023fb92f869a0477a9fffb7039329177ead106b2fddacb023" },
+    { "path": "openspec/changes/waf-ui-redesign/design.md", "sha256": "139c013c7b4ce942c560b9f0a6ed9d88466a4a5e5b45979c45a3f179827fedbb" },
+    { "path": "openspec/changes/waf-ui-redesign/tasks.md", "sha256": "316fa97f940f35662b61fb495f288b2c21f005ebb2499a9823f800d028244288" },
+    { "path": "openspec/changes/waf-ui-redesign/specs/frontend-theme/spec.md", "sha256": "408a0c5c86ee65a38a233d9004e2bd21c958320a3f0976a09dafccaf0f61deb8" },
+    { "path": "openspec/changes/waf-ui-redesign/specs/waf-dashboard/spec.md", "sha256": "4d33a1b7e74710a78d76c1d4387d2264021a2a65dafd68994e3e4de5e4f27d15" },
+    { "path": "openspec/changes/waf-ui-redesign/specs/waf-proxy/spec.md", "sha256": "32e77c78e02a4c706859b092689568a15fab46aeca000609e84882b5dd3c2bfd" }
+  ]
+}
