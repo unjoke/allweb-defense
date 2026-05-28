@@ -215,25 +215,52 @@ def main():
     config = load_config()
     logger = _setup_logger(config["log_path"])
 
-    async def _on_startup(app):
-        app["session"] = aiohttp.ClientSession()
+    from waf.dashboard import make_app as make_dashboard_app
 
-    async def _on_cleanup(app):
-        await app["session"].close()
+    async def _run():
+        # Proxy app
+        proxy_app = web.Application()
 
-    async def _handler(request):
+        async def _on_startup(app):
+            app["session"] = aiohttp.ClientSession()
+
+        async def _on_cleanup(app):
+            await app["session"].close()
+
+        async def _handler(request):
+            try:
+                return await handle_request(request, config, logger, request.app["session"])
+            except Exception as e:
+                logger.error(f"Proxy error: {e}")
+                return web.Response(status=502, text="Bad Gateway")
+
+        proxy_app.on_startup.append(_on_startup)
+        proxy_app.on_cleanup.append(_on_cleanup)
+        proxy_app.router.add_route("*", "/{path_info:.*}", _handler)
+
+        proxy_runner = web.AppRunner(proxy_app)
+        await proxy_runner.setup()
+        proxy_site = web.TCPSite(proxy_runner, port=config["listen_port"])
+        await proxy_site.start()
+
+        # Dashboard app
+        dash_app = make_dashboard_app(config)
+        dash_runner = web.AppRunner(dash_app)
+        await dash_runner.setup()
+        dash_port = config.get("dashboard_port", 8081)
+        dash_site = web.TCPSite(dash_runner, port=dash_port)
+        await dash_site.start()
+
+        print(f"WAF proxy listening on :{config['listen_port']}, forwarding to {config['backend_url']}", file=sys.stderr)
+        print(f"WAF dashboard listening on :{dash_port}", file=sys.stderr)
+
         try:
-            return await handle_request(request, config, logger, request.app["session"])
-        except Exception as e:
-            logger.error(f"Proxy error: {e}")
-            return web.Response(status=502, text="Bad Gateway")
+            await asyncio.Event().wait()
+        finally:
+            await proxy_runner.cleanup()
+            await dash_runner.cleanup()
 
-    app = web.Application()
-    app.on_startup.append(_on_startup)
-    app.on_cleanup.append(_on_cleanup)
-    app.router.add_route("*", "/{path_info:.*}", _handler)
-
-    port = config["listen_port"]
-    backend = config["backend_url"]
-    print(f"WAF proxy listening on :{port}, forwarding to {backend}", file=sys.stderr)
-    web.run_app(app, port=port, print=None)
+    try:
+        asyncio.run(_run())
+    except KeyboardInterrupt:
+        pass
