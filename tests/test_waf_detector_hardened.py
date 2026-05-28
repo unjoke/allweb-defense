@@ -147,3 +147,16 @@ def test_magic_php_fail():
 
 def test_magic_empty_fail():
     assert is_allowed_magic_bytes(b"") is False
+
+
+# ---------- 6.8 Rate limit structural lock ----------
+
+def test_rate_limit_uses_request_remote():
+    """WAF rate limit must use request.remote (not client-supplied XFF)."""
+    from pathlib import Path
+    source = Path("waf/proxy.py").read_text(encoding="utf-8")
+    rate_section = source.split("# 1. Rate limit")[1].split("# 2.")[0]
+    assert "request.remote" in source
+    # Rate-limit decision section must not reference client XFF/Real-IP
+    assert "X-Forwarded-For" not in rate_section
+    assert "X-Real-IP" not in rate_section
