@@ -161,17 +161,14 @@ def attack_horizontal_priv(base: str) -> bool:
         data["csrf_token"] = csrf
     bob.post(f"{base}/messages", data=data, allow_redirects=True)
 
-    # Find the ID of bob's just-posted message by matching content in the page
+    # Find the ID of bob's just-posted message by matching content in the page.
+    # msg_id hidden input is now admin-only; use the download link (always visible).
     r = bob.get(f"{base}/messages")
-    # Parse cards: find the card containing unique_content and extract its msg_id
-    # The template renders: <p ...>content</p> ... <input name="msg_id" value="N">
-    # We look for the msg_id that appears after the unique content
     bob_msg_id = None
-    # Split by card blocks and find the one with our content
-    cards = re.split(r'<div class="card mb-2">', r.text)
+    cards = re.split(r'<div class="msg-item">', r.text)
     for card in cards:
         if unique_content in card:
-            m = re.search(r'name="msg_id"\s+value="(\d+)"', card)
+            m = re.search(r'/download\?filename=msg_(\d+)_\w+\.txt', card)
             if m:
                 bob_msg_id = m.group(1)
                 break
@@ -179,7 +176,7 @@ def attack_horizontal_priv(base: str) -> bool:
     if not bob_msg_id:
         return False
 
-    # Alice tries to delete bob's message
+    # Alice tries to delete bob's message (vertical privilege escalation: no role check)
     alice = _login(base, "alice", "alice123")
     csrf2 = _get_csrf(alice, base, "/messages")
     del_data = {"msg_id": bob_msg_id}
@@ -191,8 +188,7 @@ def attack_horizontal_priv(base: str) -> bool:
 
     # Check if bob's message is gone
     r3 = alice.get(f"{base}/messages")
-    remaining_ids = re.findall(r'name="msg_id"\s+value="(\d+)"', r3.text)
-    return bob_msg_id not in remaining_ids
+    return unique_content not in r3.text
 
 
 def attack_vertical_priv(base: str) -> bool:
