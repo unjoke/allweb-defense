@@ -1,0 +1,309 @@
+- id: sqli-001
+  payload: "' OR 1=1--"
+  category: sql_injection
+  technique: tautology
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-002
+  payload: "' OR 'a'='a"
+  category: sql_injection
+  technique: tautology
+  difficulty: basic
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-003
+  payload: "admin'--"
+  category: sql_injection
+  technique: tautology
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-004
+  payload: "' UNION SELECT username,password FROM users--"
+  category: sql_injection
+  technique: union-based
+  difficulty: basic
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-005
+  payload: "1' UNION SELECT NULL,NULL,NULL--"
+  category: sql_injection
+  technique: union-based
+  difficulty: basic
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-006
+  payload: "UN/**/ION SE/**/LECT 1,2,3--"
+  category: sql_injection
+  technique: inline-comment
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-007
+  payload: "/*!50000UNION*/ /*!50000SELECT*/ 1,2,3--"
+  category: sql_injection
+  technique: inline-comment
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-008
+  payload: "%55NION %53ELECT 1,2,3--"
+  category: sql_injection
+  technique: url-encoding
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-009
+  payload: "%27%20OR%201%3D1--"
+  category: sql_injection
+  technique: url-encoding
+  difficulty: intermediate
+  source: OWASP
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-010
+  payload: "%2555NION %2553ELECT 1,2,3--"
+  category: sql_injection
+  technique: double-encoding
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-011
+  payload: "%252f%252a%252aUNION%252a%252f SELECT"
+  category: sql_injection
+  technique: double-encoding
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-012
+  payload: "ＵＮＩＯＮ ＳＥＬＥＣＴ 1,2,3"
+  category: sql_injection
+  technique: unicode-fullwidth
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-013
+  payload: "SELECT CHAR(85,78,73,79,78)"
+  category: sql_injection
+  technique: char-function
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-014
+  payload: "' OR username=CHAR(97,100,109,105,110)--"
+  category: sql_injection
+  technique: char-function
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-015
+  payload: "SELECT 0x554e494f4e"
+  category: sql_injection
+  technique: hex-encoding
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-016
+  payload: "'UN'||'ION' SELECT 1,2,3--"
+  category: sql_injection
+  technique: concatenation
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-017
+  payload: "CONCAT('SEL','ECT') * FROM users"
+  category: sql_injection
+  technique: concatenation
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-018
+  payload: "' AND SLEEP(5)--"
+  category: sql_injection
+  technique: time-blind
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-019
+  payload: "' AND BENCHMARK(10000000,SHA1('test'))--"
+  category: sql_injection
+  technique: time-blind
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-020
+  payload: "'; WAITFOR DELAY '0:0:5'--"
+  category: sql_injection
+  technique: time-blind
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-021
+  payload: "' AND 1=1--"
+  category: sql_injection
+  technique: boolean-blind
+  difficulty: basic
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-022
+  payload: "' AND SUBSTRING(@@version,1,1)='5'--"
+  category: sql_injection
+  technique: boolean-blind
+  difficulty: advanced
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-023
+  payload: "(SELECT(1))"
+  category: sql_injection
+  technique: parenthesis-nesting
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-024
+  payload: "(SELECT * FROM(SELECT 1)a)"
+  category: sql_injection
+  technique: parenthesis-nesting
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-025
+  payload: "`union`select 1,2,3"
+  category: sql_injection
+  technique: backtick-wrap
+  difficulty: advanced
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-026
+  payload: "`select` * from `users`"
+  category: sql_injection
+  technique: backtick-wrap
+  difficulty: advanced
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-027
+  payload: "UNION%09SELECT 1,2,3--"
+  category: sql_injection
+  technique: whitespace-substitution
+  difficulty: intermediate
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-028
+  payload: "UNION%0aSELECT 1,2,3--"
+  category: sql_injection
+  technique: whitespace-substitution
+  difficulty: intermediate
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-029
+  payload: "UNION%0dSELECT 1,2,3--"
+  category: sql_injection
+  technique: whitespace-substitution
+  difficulty: intermediate
+  source: PortSwigger
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-030
+  payload: "UnIoN sElEcT 1,2,3--"
+  category: sql_injection
+  technique: case-mixing
+  difficulty: basic
+  source: PayloadsAllTheThings
+  expected: blocked
+  inject_point: query_param
+  param_name: q
+
+- id: sqli-031
+  payload: "uNiOn AlL sElEcT username,password FROM users--"
+  category: sql_injection
+  technique: case-mixing
+  difficulty: basic
+  source: HackTricks
+  expected: blocked
+  inject_point: query_param
+  param_name: q
