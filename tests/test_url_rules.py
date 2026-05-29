@@ -17,3 +17,13 @@ def test_module_imports():
     assert callable(load_url_rules)
     assert callable(is_rule_enabled)
     assert callable(emit_global_mask_warnings)
+
+
+@pytest.fixture
+def tmp_yaml(tmp_path):
+    """Write a YAML body to a temp file and return the path."""
+    def _write(body: str) -> str:
+        p = tmp_path / "rules.yaml"
+        p.write_text(body, encoding="utf-8")
+        return str(p)
+    return _write
