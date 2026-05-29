@@ -1,7 +1,7 @@
 ---
 change: waf-url-rules
 design-doc: docs/superpowers/specs/2026-05-29-waf-url-rules-design.md
-base-ref: 9e2e4ef290108777f21a04d3d99011fa222875a9
+base-ref: 864c22900de03ab72c551c1009d004eb12963058
 ---
 
 # WAF URL Rules Implementation Plan
