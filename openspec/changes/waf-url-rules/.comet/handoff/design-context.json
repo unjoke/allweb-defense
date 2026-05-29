@@ -1,0 +1,15 @@
+{
+  "change": "waf-url-rules",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "d8030bc403904b64f42c9ee12540ea7e7f4971d4f5bc548fc7619d751776182e",
+  "files": [
+    { "path": "openspec/changes/waf-url-rules/proposal.md", "sha256": "48a254f8d19a6695360c859eaac1bfdf7f6acba4fdd3636a21a8cd56ffd1427d" },
+    { "path": "openspec/changes/waf-url-rules/design.md", "sha256": "366fd92a7f1bbccaa4e89cad0987f70a500283210bf0a0e6fc6a05905d4700a8" },
+    { "path": "openspec/changes/waf-url-rules/tasks.md", "sha256": "0443c39d71f101a6f54f0e934832fd0b00e7428a21515dab0c8a04b3dea9c51b" },
+    { "path": "openspec/changes/waf-url-rules/specs/waf-config/spec.md", "sha256": "f397482678a68717947ea9e1027ea88f7cb88936a9226c99c1aef917ee44c095" },
+    { "path": "openspec/changes/waf-url-rules/specs/waf-detector/spec.md", "sha256": "d6ab90292ddfe8b76bb6331faaa9c744a83bc5536e41bd80ef7a18a380617e6c" }
+  ]
+}

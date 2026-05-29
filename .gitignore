@@ -16,6 +16,10 @@ venv/
 .venv/
 env/
 
+uploads/
+messages/
+.playwright-mcp/
+
 # pytest
 .pytest_cache/
 
@@ -26,3 +30,9 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+app.db
+messages/
+fangan.md
+recommend.md
+app.db
+security.log
