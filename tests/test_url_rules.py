@@ -188,3 +188,73 @@ class TestLoaderPositive:
         # FileNotFoundError must propagate (config layer turns it into sys.exit)
         with pytest.raises(FileNotFoundError):
             load_url_rules(str(tmp_path / "nope.yaml"))
+
+
+class TestMatcher:
+    @staticmethod
+    def _build(yaml_body: str, tmp_yaml) -> UrlRules:
+        return load_url_rules(tmp_yaml(yaml_body))
+
+    # M1: exact hit
+    def test_m1_exact_hit(self, tmp_yaml):
+        ur = self._build("rules:\n  - url: /login\n    detect: [SQL]\n", tmp_yaml)
+        assert ur.is_enabled("/login", "sql_injection") is True
+
+    # M2: exact does NOT match trailing-slash variant
+    def test_m2_exact_no_trailing_slash_match(self, tmp_yaml):
+        ur = self._build("rules:\n  - url: /login\n    detect: [SQL]\n", tmp_yaml)
+        # /login/ does not match /login: no rule matches → default-on
+        assert ur.is_enabled("/login/", "sql_injection") is True
+        # And other keys also default-on for the unmatched path
+        assert ur.is_enabled("/login/", "xss") is True
+        # On /login itself, only SQL is on; XSS is narrowed away
+        assert ur.is_enabled("/login", "xss") is False
+
+    # M3: prefix matches sub-paths
+    def test_m3_prefix_sub_paths(self, tmp_yaml):
+        ur = self._build("rules:\n  - url: /api/*\n    detect: [SQL]\n", tmp_yaml)
+        assert ur.is_enabled("/api/foo", "sql_injection") is True
+        assert ur.is_enabled("/api/foo/bar", "sql_injection") is True
+        # XSS narrowed away on those paths
+        assert ur.is_enabled("/api/foo", "xss") is False
+
+    # M4: prefix requires segment boundary
+    def test_m4_prefix_segment_boundary(self, tmp_yaml):
+        ur = self._build("rules:\n  - url: /api/*\n    detect: [SQL]\n", tmp_yaml)
+        # /apifoo does NOT match /api/* (no segment boundary)
+        assert ur.is_enabled("/apifoo", "sql_injection") is True   # default-on, not narrowed
+        assert ur.is_enabled("/apifoo", "xss") is True             # default-on
+        # /api alone does NOT match /api/* either (spec)
+        assert ur.is_enabled("/api", "xss") is True
+
+    # M5: catchall
+    def test_m5_catchall(self, tmp_yaml):
+        ur = self._build("rules:\n  - url: /*\n    detect: [SQL]\n", tmp_yaml)
+        assert ur.is_enabled("/", "sql_injection") is True
+        assert ur.is_enabled("/anything", "sql_injection") is True
+        assert ur.is_enabled("/deeply/nested/path", "sql_injection") is True
+        # All other keys narrowed away by the catchall
+        assert ur.is_enabled("/", "xss") is False
+        assert ur.is_enabled("/anything", "path_traversal") is False
+
+    # M6: first-match-wins
+    def test_m6_first_match_wins(self, tmp_yaml):
+        ur = self._build(
+            "rules:\n"
+            "  - url: /api/admin/*\n    detect: [SQL]\n"
+            "  - url: /api/*\n    detect: [SQL, XSS]\n",
+            tmp_yaml,
+        )
+        # /api/admin/users hits the first rule only — XSS NOT on
+        assert ur.is_enabled("/api/admin/users", "sql_injection") is True
+        assert ur.is_enabled("/api/admin/users", "xss") is False
+        # /api/other hits the second rule — both SQL and XSS on
+        assert ur.is_enabled("/api/other", "sql_injection") is True
+        assert ur.is_enabled("/api/other", "xss") is True
+
+    # M7: matcher receives already-decoded path (input is the caller's responsibility)
+    def test_m7_decoded_path_input(self, tmp_yaml):
+        ur = self._build("rules:\n  - url: /api/*\n    detect: [SQL]\n", tmp_yaml)
+        # Caller (proxy) passes request.path (decoded) — we just verify the match works
+        # on the decoded form. The encoded form would not have been written by the user.
+        assert ur.is_enabled("/api/admin", "sql_injection") is True
