@@ -119,6 +119,40 @@ log_path: "security.log"
 python -m waf --disable sql_injection
 ```
 
+## WAF URL 规则文件
+
+除了 `waf/config.yaml` 的全局开关，可以为不同 URL 路径单独裁剪要启用的检测项。规则写在一份独立的 YAML 文件里：
+
+```yaml
+# 支持的检测类型（大小写敏感）：SQL / XSS / PATH / CMD / UPLOAD
+# 匹配语法：精确匹配（/login）+ 前缀通配符（/api/* 要求斜杠分段）+ 兜底（/*）
+# 匹配策略：首个命中胜出（按文件顺序从上往下，nginx-style）
+# 未命中：所有检测保持启用（受 waf/config.yaml 全局开关上限约束）
+# 全局上限：waf/config.yaml 中关闭的检测，URL 规则无法重新启用，启动时会打印 warning
+
+rules:
+  - url: /search
+    detect: [SQL, XSS]
+  - url: /upload/*
+    detect: [UPLOAD, PATH]
+  - url: /api/*
+    detect: [SQL]
+```
+
+启用方式（CLI 优先于 YAML，二者皆未给则不加载）：
+
+```bash
+# 命令行
+python -m waf --url-rules waf/url_rules.example.yaml
+
+# 或在 waf/config.yaml 中加一行
+# url_rules_file: "waf/url_rules.example.yaml"
+```
+
+错误诊断：规则文件加载采用严格模式 —— YAML 语法错、未知 detect token（含错误大小写如 `sql`）、未知字段、`detect` 为空、URL 不以 `/` 开头、通配符不在末尾、URL 重复，都会在启动时报错并退出，错误信息带条目索引。`RATE`（频率限制）和 `security_headers`（安全响应头）不在 URL 规则词汇中，仍按全局开关。
+
+完整示例见 `waf/url_rules.example.yaml`。
+
 ## 攻击演示脚本
 
 脚本默认打漏洞版（端口 5000），可改端口验证防护效果。

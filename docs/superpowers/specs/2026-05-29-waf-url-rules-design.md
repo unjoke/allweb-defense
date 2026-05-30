@@ -340,3 +340,15 @@ None — Q1–Q5 closed in brainstorming, captured as decisions above. Anything 
 - Roll-out: deploy without setting `--url-rules` or `url_rules_file` → behavior identical to today. Then per-environment, ops copies `waf/url_rules.example.yaml` → `waf/url_rules.yaml` (or any path), tweaks, and adds the flag.
 - Roll-back: drop the CLI flag / unset the YAML key. No data, no state, no migration.
 - The change is additive and gated; risk is bounded to "did we silently break the dispatch when url_rules=None". Test I1 (regression-suite under `url_rules=None`) is the load-bearing test for that promise.
+
+## 9. Implementation Divergence
+
+Recorded post-build during the Comet verify phase. Items the as-built code drifts from §2 above, with rationale.
+
+### 9.1 `UrlRules.detect_keys_for(path)` not implemented
+
+§2.1 listed `detect_keys_for(path) -> Optional[frozenset[str]]` as a public method on `UrlRules`, intended to expose the matching rule's detect set for warning emission. As built, `emit_global_mask_warnings` iterates `url_rules.rules` directly (per-rule, per-key) rather than going through a path-based lookup — so the method had no caller and was omitted.
+
+- **Reason**: the warning emitter doesn't take a `path`; it walks every rule once at load time. A `detect_keys_for(path)` would be needed by a per-request consumer, but none of the planned callers (proxy dispatch, warning emission) need it. Adding it as dead API would invite future confusion.
+- **Impact**: none. The public surface is `UrlRulesError`, `UrlRules` (with `is_enabled`, `rules` attribute), `load_url_rules`, `is_rule_enabled`, `emit_global_mask_warnings` — all callers in the codebase use only these. Future code that needs path-keyed lookup can add the method then; the matcher loop is two lines.
+- **Resolution**: design intent unchanged; this section records the API drop. Main spec (`openspec/specs/waf-detector/spec.md`) will reflect actual behavior at archive time.
