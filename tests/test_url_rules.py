@@ -165,3 +165,26 @@ class TestLoaderStrict:
         )
         with pytest.raises(UrlRulesError, match=r"rules\[1\]: duplicate url '/search' \(also at rules\[0\]\)"):
             load_url_rules(path)
+
+
+class TestLoaderPositive:
+    def test_minimal_valid_file(self, tmp_yaml):
+        path = tmp_yaml(
+            "rules:\n"
+            "  - url: /search\n    detect: [SQL, XSS]\n"
+            "  - url: /upload/*\n    detect: [UPLOAD, PATH]\n"
+            "  - url: /*\n    detect: [SQL]\n"
+        )
+        url_rules = load_url_rules(path)
+        assert len(url_rules.rules) == 3
+        assert url_rules.rules[0].kind == "exact"
+        assert url_rules.rules[0].pattern == "/search"
+        assert url_rules.rules[0].detect_keys == frozenset({"sql_injection", "xss"})
+        assert url_rules.rules[1].kind == "prefix"
+        assert url_rules.rules[1].pattern == "/upload"
+        assert url_rules.rules[2].kind == "catchall"
+
+    def test_file_not_found(self, tmp_path):
+        # FileNotFoundError must propagate (config layer turns it into sys.exit)
+        with pytest.raises(FileNotFoundError):
+            load_url_rules(str(tmp_path / "nope.yaml"))

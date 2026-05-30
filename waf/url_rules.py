@@ -67,7 +67,83 @@ def _compile_url_pattern(url: object, entry_index: int) -> tuple[str, str]:
 
 
 def load_url_rules(path: str) -> UrlRules:
-    raise NotImplementedError  # filled in Task 5
+    """Read YAML, validate strictly, compile. Raises FileNotFoundError or UrlRulesError."""
+    import yaml  # local import: PyYAML is required; config layer guards optionality elsewhere
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+    except yaml.YAMLError as e:
+        raise UrlRulesError(f"failed to parse YAML at {path}: {e}") from e
+
+    if not isinstance(data, dict):
+        raise UrlRulesError(
+            f"top-level must be a mapping with key 'rules', got {type(data).__name__}"
+        )
+    if "rules" not in data:
+        raise UrlRulesError("top-level must be a mapping with key 'rules'")
+    raw_rules = data["rules"]
+    if not isinstance(raw_rules, list):
+        raise UrlRulesError(f"'rules' must be a list, got {type(raw_rules).__name__}")
+
+    compiled: list[_CompiledRule] = []
+    seen_urls: dict[str, int] = {}
+
+    for i, entry in enumerate(raw_rules):
+        if not isinstance(entry, dict):
+            raise UrlRulesError(
+                f"rules[{i}]: each rule must be a mapping, got {type(entry).__name__}"
+            )
+
+        # Required fields (V4)
+        if "url" not in entry:
+            raise UrlRulesError(f"rules[{i}]: missing required field 'url'")
+        if "detect" not in entry:
+            raise UrlRulesError(f"rules[{i}]: missing required field 'detect'")
+
+        # Unknown fields (V5)
+        unknown = set(entry.keys()) - _ALLOWED_ENTRY_FIELDS
+        if unknown:
+            bad = sorted(unknown)[0]
+            raise UrlRulesError(
+                f"rules[{i}]: unknown field {bad!r} "
+                f"(allowed: {sorted(_ALLOWED_ENTRY_FIELDS)})"
+            )
+
+        # url validation + compile (V6, V7)
+        url_str = entry["url"]
+        kind, pattern = _compile_url_pattern(url_str, entry_index=i)
+
+        # Duplicate url (V11) — literal-string match (only meaningful when url_str is a str;
+        # earlier compile call would have raised V6 if not a str, so url_str is hashable here)
+        if isinstance(url_str, str):
+            if url_str in seen_urls:
+                raise UrlRulesError(
+                    f"rules[{i}]: duplicate url {url_str!r} (also at rules[{seen_urls[url_str]}])"
+                )
+            seen_urls[url_str] = i
+
+        # detect validation (V8, V9, V10)
+        detect = entry["detect"]
+        if not isinstance(detect, list):
+            raise UrlRulesError(
+                f"rules[{i}]: detect must be a list, got {type(detect).__name__}"
+            )
+        if len(detect) == 0:
+            raise UrlRulesError(f"rules[{i}]: detect must not be empty")
+
+        keys: set[str] = set()
+        for tok in detect:
+            if not isinstance(tok, str) or tok not in _VALID_TOKENS:
+                raise UrlRulesError(
+                    f"rules[{i}]: unknown token {tok!r} "
+                    f"(valid: {sorted(_VALID_TOKENS)}; case-sensitive)"
+                )
+            keys.add(_TOKEN_TO_KEY[tok])
+
+        compiled.append(_CompiledRule(kind=kind, pattern=pattern, detect_keys=frozenset(keys)))
+
+    return UrlRules(compiled)
 
 
 def is_rule_enabled(config: dict, path: str, key: str) -> bool:
