@@ -47,6 +47,25 @@ class UrlRules:
         raise NotImplementedError  # filled in Task 7
 
 
+def _compile_url_pattern(url: object, entry_index: int) -> tuple[str, str]:
+    """Compile a YAML 'url' value to (kind, pattern). Raises UrlRulesError."""
+    if not isinstance(url, str):
+        raise UrlRulesError(f"rules[{entry_index}]: url must be a string, got {type(url).__name__}")
+    if not url.startswith("/"):
+        raise UrlRulesError(f"rules[{entry_index}]: url must start with '/', got {url!r}")
+
+    if "*" in url:
+        if url == "/*":
+            return ("catchall", "")
+        if url.endswith("/*"):
+            return ("prefix", url[:-2])
+        raise UrlRulesError(
+            f"rules[{entry_index}]: '*' is only allowed at the end (e.g. /api/*), got {url!r}"
+        )
+
+    return ("exact", url)
+
+
 def load_url_rules(path: str) -> UrlRules:
     raise NotImplementedError  # filled in Task 5
 
