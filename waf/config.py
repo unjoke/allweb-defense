@@ -22,6 +22,7 @@ DEFAULTS = {
         "file_upload": True,
         "security_headers": True,
     },
+    "url_rules_file": None,
     "rate_limit": {
         "max_failures": 10,
         "window": 60,
@@ -46,6 +47,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--listen", type=int, default=None)
     parser.add_argument("--backend", type=str, default=None)
     parser.add_argument("--config", type=str, default=_UNSET)
+    parser.add_argument("--url-rules", type=str, default=_UNSET, dest="url_rules")
     parser.add_argument("--disable", nargs="+", default=[])
     return parser
 
