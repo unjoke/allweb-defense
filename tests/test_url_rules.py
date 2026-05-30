@@ -294,3 +294,33 @@ class TestIsRuleEnabledHelper:
         cfg = {"rules": {"xss": False}, "url_rules": ur}
         # Even though url_rules lists XSS, global cap is off → False
         assert is_rule_enabled(cfg, "/search", "xss") is False
+
+
+class TestWarningEmission:
+    def test_w1_warns_on_global_off(self, tmp_yaml, capsys):
+        ur = load_url_rules(tmp_yaml(
+            "rules:\n"
+            "  - url: /search\n    detect: [XSS, SQL]\n"
+            "  - url: /api/*\n    detect: [SQL]\n"
+        ))
+        global_rules = {"xss": False, "sql_injection": True, "path_traversal": True,
+                        "cmd_injection": True, "file_upload": True}
+        emit_global_mask_warnings(ur, global_rules)
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        # Only one warning: rule[0] lists XSS but xss is globally false.
+        assert "url_rules entry [0] lists xss" in captured.err
+        assert "rules.xss is false" in captured.err
+        # SQL is on globally → no warning for it on either rule
+        assert "lists sql_injection" not in captured.err
+
+    def test_w1b_no_warnings_when_all_globals_on(self, tmp_yaml, capsys):
+        ur = load_url_rules(tmp_yaml(
+            "rules:\n  - url: /search\n    detect: [SQL, XSS]\n"
+        ))
+        global_rules = {k: True for k in
+                        ("sql_injection", "xss", "path_traversal",
+                         "cmd_injection", "file_upload")}
+        emit_global_mask_warnings(ur, global_rules)
+        captured = capsys.readouterr()
+        assert captured.err == ""

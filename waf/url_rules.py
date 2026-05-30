@@ -171,4 +171,12 @@ def is_rule_enabled(config: dict, path: str, key: str) -> bool:
 
 
 def emit_global_mask_warnings(url_rules: UrlRules, global_rules: dict) -> None:
-    raise NotImplementedError  # filled in Task 9
+    """Print one stderr warning per (rule, key) where global_rules[key] is False."""
+    for rule_index, rule in enumerate(url_rules.rules):
+        for key in sorted(rule.detect_keys):     # sort for deterministic output
+            if not global_rules.get(key, True):
+                print(
+                    f"warning: url_rules entry [{rule_index}] lists {key} "
+                    f"but global rules.{key} is false; this rule has no effect for {key}",
+                    file=sys.stderr,
+                )
