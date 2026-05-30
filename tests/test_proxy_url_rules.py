@@ -157,3 +157,21 @@ def test_i8_security_headers_not_narrowed(tmp_path):
     assert resp.status == 200
     assert "X-Frame-Options" in resp.headers
     assert "Content-Security-Policy" in resp.headers
+
+
+# --- Drift guard: every internal key in _TOKEN_TO_KEY must be referenced by handle_request ----
+#
+# If a future change adds a 6th detection type to the proxy's dispatch, _TOKEN_TO_KEY
+# must be extended in lockstep. This test catches silent drift (design doc §5 Risk #4).
+
+def test_drift_internal_keys_referenced_by_proxy():
+    from pathlib import Path
+    from waf.url_rules import _TOKEN_TO_KEY
+
+    proxy_src = Path(__file__).resolve().parents[1] / "waf" / "proxy.py"
+    src = proxy_src.read_text(encoding="utf-8")
+    for internal_key in _TOKEN_TO_KEY.values():
+        assert f'"{internal_key}"' in src, (
+            f"internal key {internal_key!r} declared in _TOKEN_TO_KEY but not "
+            f"referenced in waf/proxy.py — token vocabulary may be out of sync"
+        )

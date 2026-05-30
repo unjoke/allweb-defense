@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
-from typing import Iterable, Literal, Optional
+from typing import Literal
 
 # YAML-token (external) → internal config-key (matches existing rules.* keys).
 _TOKEN_TO_KEY: dict[str, str] = {
