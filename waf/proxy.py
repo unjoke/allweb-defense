@@ -21,6 +21,7 @@ from waf.detector import (
     record_login_failure,
     sanitize_xss,
 )
+from waf.url_rules import is_rule_enabled
 
 _rate_state: dict = {}
 
@@ -151,18 +152,18 @@ async def handle_request(request: web.Request, config: dict, logger: logging.Log
     # 3. Detection (block on first hit)
     for key, val in all_string_params.items():
         nval = normalize(val)
-        if rules.get("sql_injection", True) and detect_sql_injection(nval):
+        if is_rule_enabled(config, path, "sql_injection") and detect_sql_injection(nval):
             _log_block(logger, "sql-injection", ip, path, val)
             return _blocked(403, "Forbidden")
-        if rules.get("path_traversal", True) and detect_path_traversal(nval):
+        if is_rule_enabled(config, path, "path_traversal") and detect_path_traversal(nval):
             _log_block(logger, "path-traversal", ip, path, val)
             return _blocked(403, "Forbidden")
-        if rules.get("cmd_injection", True) and detect_cmd_injection(nval):
+        if is_rule_enabled(config, path, "cmd_injection") and detect_cmd_injection(nval):
             _log_block(logger, "cmd-injection", ip, path, val)
             return _blocked(403, "Forbidden")
 
     for field_name, filename in filenames:
-        if rules.get("file_upload", True):
+        if is_rule_enabled(config, path, "file_upload"):
             if not is_allowed_extension(filename):
                 _log_block(logger, "file-upload", ip, path, filename)
                 return _blocked(400, "Bad Request")
@@ -175,7 +176,7 @@ async def handle_request(request: web.Request, config: dict, logger: logging.Log
                 return _blocked(400, "Bad Request")
 
     # 4. XSS sanitize (not block)
-    if rules.get("xss", True):
+    if is_rule_enabled(config, path, "xss"):
         sanitized_get = {}
         for k, v in get_params.items():
             nv = normalize(v)
