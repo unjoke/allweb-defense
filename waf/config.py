@@ -2,6 +2,12 @@ import argparse
 import copy
 import sys
 
+from waf.url_rules import (
+    UrlRulesError,
+    emit_global_mask_warnings,
+    load_url_rules,
+)
+
 _UNSET = object()
 
 try:
@@ -91,5 +97,24 @@ def load_config(argv=None) -> dict:
             print(f"Warning: unknown rule '{rule_name}', ignoring", file=sys.stderr)
             continue
         config["rules"][rule_name] = False
+
+    # --- url_rules layer ---
+    url_rules_path = (
+        args.url_rules if args.url_rules is not _UNSET
+        else config.get("url_rules_file")
+    )
+    if url_rules_path:
+        try:
+            url_rules_obj = load_url_rules(url_rules_path)
+        except FileNotFoundError:
+            print(f"Error: url-rules file not found: {url_rules_path}", file=sys.stderr)
+            sys.exit(1)
+        except UrlRulesError as e:
+            print(f"Error in url-rules file {url_rules_path}: {e}", file=sys.stderr)
+            sys.exit(1)
+        emit_global_mask_warnings(url_rules_obj, config["rules"])
+        config["url_rules"] = url_rules_obj
+    else:
+        config["url_rules"] = None
 
     return config
