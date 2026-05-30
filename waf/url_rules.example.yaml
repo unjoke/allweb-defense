@@ -1,0 +1,36 @@
+# WAF URL rule file
+#
+# Supported detection types (case-sensitive):
+#   SQL    — SQL injection
+#   XSS    — Cross-site scripting (sanitized, not blocked)
+#   PATH   — Path traversal
+#   CMD    — Command injection
+#   UPLOAD — File upload (extension whitelist + magic bytes)
+#
+# URL match syntax:
+#   /login    — exact match (does NOT match /login/)
+#   /api/*    — prefix wildcard with segment boundary (matches /api/foo, /api/foo/bar; NOT /api or /apifoo)
+#   /*        — catch-all (matches any path)
+#
+# Match policy: first match wins, top-to-bottom. Place more-specific rules first.
+# Unmatched URLs: ALL detections enabled (subject to global toggles).
+#
+# Global toggles in waf/config.yaml are an upper bound. Detection types disabled
+# globally cannot be re-enabled here. A warning is printed at startup if a rule
+# lists a token that is globally off.
+#
+# RATE (brute-force lockout) and security-header injection are NOT URL-scoped;
+# they remain controlled solely by waf/config.yaml::rules.{rate_limit,security_headers}.
+
+rules:
+  # Search pages: only SQL & XSS scanning needed
+  - url: /search
+    detect: [SQL, XSS]
+
+  # Upload endpoints: focus on file-upload + path-traversal checks
+  - url: /upload/*
+    detect: [UPLOAD, PATH]
+
+  # Generic API: detect SQL only (others narrowed to reduce false positives)
+  - url: /api/*
+    detect: [SQL]
