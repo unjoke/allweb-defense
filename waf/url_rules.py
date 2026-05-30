@@ -44,7 +44,20 @@ class UrlRules:
         self.rules: list[_CompiledRule] = rules
 
     def is_enabled(self, path: str, key: str) -> bool:
-        raise NotImplementedError  # filled in Task 7
+        """First-match-wins. If no rule matches, returns True (default-on)."""
+        for rule in self.rules:
+            if self._match(rule, path):
+                return key in rule.detect_keys
+        return True
+
+    @staticmethod
+    def _match(rule: _CompiledRule, path: str) -> bool:
+        if rule.kind == "catchall":
+            return True
+        if rule.kind == "exact":
+            return path == rule.pattern
+        # prefix: requires segment boundary (so /api/* does NOT match /api or /apifoo)
+        return path.startswith(rule.pattern + "/")
 
 
 def _compile_url_pattern(url: object, entry_index: int) -> tuple[str, str]:
