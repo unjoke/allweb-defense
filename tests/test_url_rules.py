@@ -258,3 +258,39 @@ class TestMatcher:
         # Caller (proxy) passes request.path (decoded) — we just verify the match works
         # on the decoded form. The encoded form would not have been written by the user.
         assert ur.is_enabled("/api/admin", "sql_injection") is True
+
+
+class TestIsRuleEnabledHelper:
+    @staticmethod
+    def _ur(yaml_body: str, tmp_yaml) -> UrlRules:
+        return load_url_rules(tmp_yaml(yaml_body))
+
+    # E1: url_rules=None → always True (subject to global cap)
+    def test_e1_none_always_true(self):
+        cfg = {"rules": {"sql_injection": True}, "url_rules": None}
+        assert is_rule_enabled(cfg, "/anywhere", "sql_injection") is True
+        assert is_rule_enabled(cfg, "/anywhere", "xss") is True
+
+    # E1b: url_rules=None but global off → False (global cap still applied)
+    def test_e1b_none_global_off_false(self):
+        cfg = {"rules": {"xss": False}, "url_rules": None}
+        assert is_rule_enabled(cfg, "/anywhere", "xss") is False
+
+    # E2: hit-with-key
+    def test_e2_hit_with_key(self, tmp_yaml):
+        ur = self._ur("rules:\n  - url: /search\n    detect: [SQL]\n", tmp_yaml)
+        cfg = {"rules": {"sql_injection": True}, "url_rules": ur}
+        assert is_rule_enabled(cfg, "/search", "sql_injection") is True
+
+    # E3: hit-without-key
+    def test_e3_hit_without_key(self, tmp_yaml):
+        ur = self._ur("rules:\n  - url: /search\n    detect: [SQL]\n", tmp_yaml)
+        cfg = {"rules": {"sql_injection": True, "xss": True}, "url_rules": ur}
+        assert is_rule_enabled(cfg, "/search", "xss") is False
+
+    # E4: global cap wins over url_rules
+    def test_e4_global_cap_wins(self, tmp_yaml):
+        ur = self._ur("rules:\n  - url: /search\n    detect: [XSS]\n", tmp_yaml)
+        cfg = {"rules": {"xss": False}, "url_rules": ur}
+        # Even though url_rules lists XSS, global cap is off → False
+        assert is_rule_enabled(cfg, "/search", "xss") is False

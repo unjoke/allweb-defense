@@ -160,7 +160,14 @@ def load_url_rules(path: str) -> UrlRules:
 
 
 def is_rule_enabled(config: dict, path: str, key: str) -> bool:
-    raise NotImplementedError  # filled in Task 8
+    """effective(path, key) = global[key] AND (url_rules is None OR url_rules.is_enabled(path, key))."""
+    rules = config.get("rules", {})
+    if not rules.get(key, True):       # global cap
+        return False
+    url_rules = config.get("url_rules")
+    if url_rules is None:
+        return True
+    return url_rules.is_enabled(path, key)
 
 
 def emit_global_mask_warnings(url_rules: UrlRules, global_rules: dict) -> None:
