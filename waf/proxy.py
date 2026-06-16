@@ -25,11 +25,11 @@ from waf.url_rules import is_rule_enabled
 
 _rate_state: dict = {}
 
-_SHARED_TEMPLATES = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "shared", "templates"
+_APP_TEMPLATES = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "app", "templates"
 )
 _block_jinja = Environment(
-    loader=FileSystemLoader(_SHARED_TEMPLATES),
+    loader=FileSystemLoader(_APP_TEMPLATES),
     autoescape=select_autoescape(["html"]),
 )
 _block_jinja.globals["get_flashed_messages"] = lambda *a, **kw: []
@@ -73,7 +73,7 @@ def _log_sanitized(logger, ip: str, path: str, payload: str) -> None:
 # --- response helpers ---
 
 def _blocked(status: int, msg: str) -> web.Response:
-    """Return a styled error page (uses shared/templates 403/429) when available, plain text otherwise."""
+    """Return a styled error page when available, plain text otherwise."""
     if status == 403:
         body = _render_block_page("403.html", message=msg)
         return web.Response(status=403, text=body, content_type="text/html")

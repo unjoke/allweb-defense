@@ -1,14 +1,12 @@
 """
 Brute Force Login Attack Demo
 Rapidly tries a list of common passwords against the /login endpoint.
-The vulnerable app has no rate limiting; the protected app locks out after 10 failures.
-Run against both apps to compare behavior.
+Run it against the WAF entrypoint to verify rate limiting behavior.
 """
 import requests
 import time
 
-VULN_BASE  = "http://127.0.0.1:5000"
-PROT_BASE  = "http://127.0.0.1:5001"
+TARGET_BASE = "http://127.0.0.1:8080"
 
 # Common password list (short for demo)
 PASSWORDS = [
@@ -73,10 +71,8 @@ if __name__ == "__main__":
     print("Brute Force Demo")
     print("=" * 60)
 
-    found_v, blocked_v = brute_force(VULN_BASE, "Vulnerable")
-    found_p, blocked_p = brute_force(PROT_BASE, "Protected")
+    found, blocked = brute_force(TARGET_BASE, "WAF")
 
     print("\n" + "=" * 60)
     print("Summary:")
-    print(f"  Vulnerable app: {'password cracked: ' + repr(found_v) if found_v else 'not cracked'}")
-    print(f"  Protected app:  {'blocked at attempt ' + str(blocked_p) if blocked_p else ('cracked: ' + repr(found_p) if found_p else 'not cracked')}")
+    print(f"  WAF target: {'blocked at attempt ' + str(blocked) if blocked else ('cracked: ' + repr(found) if found else 'not cracked')}")

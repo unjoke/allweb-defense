@@ -15,7 +15,7 @@ from flask import (
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.join(BASE_DIR, "..", "..")
-TEMPLATE_DIR = os.path.join(ROOT_DIR, "shared", "templates")
+TEMPLATE_DIR = os.path.join(ROOT_DIR, "app", "templates")
 DB_PATH = os.path.join(ROOT_DIR, "app.db")
 MESSAGES_DIR = os.path.join(ROOT_DIR, "messages")
 UPLOADS_DIR = os.path.join(ROOT_DIR, "uploads")
